@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Healthcare-specific colors
+				pharma: {
+					primary: "#0E7490", // Teal
+					secondary: "#14B8A6", // Lighter teal
+					accent: "#7E22CE", // Purple for accent
+					patient: "#0369A1", // Blue for patient areas
+					doctor: "#15803D", // Green for doctor areas
+					pharmacy: "#B45309", // Amber for pharmacy areas
+					light: "#E0F2FE", // Light blue background
+					muted: "#94A3B8", // Muted text color
 				}
 			},
 			borderRadius: {
