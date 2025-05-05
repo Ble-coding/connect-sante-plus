@@ -7,6 +7,8 @@ import FeaturesSection from '@/components/home/FeaturesSection';
 import UserTypesSection from '@/components/home/UserTypesSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import CtaSection from '@/components/home/CtaSection';
+import StorySection from '@/components/home/StorySection';
+import PartnersSection from '@/components/home/PartnersSection';
 
 const Index = () => {
   return (
@@ -15,8 +17,10 @@ const Index = () => {
       <main className="flex-grow">
         <HeroSection />
         <FeaturesSection />
+        <StorySection />
         <UserTypesSection />
         <TestimonialsSection />
+        <PartnersSection />
         <CtaSection />
       </main>
       <Footer />
