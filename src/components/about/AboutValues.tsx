@@ -10,7 +10,7 @@ const AboutValues = () => {
     },
     {
       title: 'Accessibilité',
-      description: 'Nous concevons nos services pour qu'ils soient utilisables par tous, indépendamment de leur localisation ou de leurs moyens.'
+      description: 'Nous concevons nos services pour qu\'ils soient utilisables par tous, indépendamment de leur localisation ou de leurs moyens.'
     },
     {
       title: 'Confidentialité',
@@ -22,11 +22,11 @@ const AboutValues = () => {
     },
     {
       title: 'Empathie',
-      description: 'Nous plaçons l'humain au centre de toutes nos décisions et innovations.'
+      description: 'Nous plaçons l\'humain au centre de toutes nos décisions et innovations.'
     },
     {
       title: 'Excellence',
-      description: 'Nous visons l'excellence dans tous nos services et interactions.'
+      description: 'Nous visons l\'excellence dans tous nos services et interactions.'
     }
   ];
 
