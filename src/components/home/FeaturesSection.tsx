@@ -4,7 +4,7 @@ import {
   SearchCheck, 
   Video, 
   MessageSquare, 
-  Pills, 
+  Pill, 
   Clock, 
   Bell 
 } from 'lucide-react';
@@ -28,7 +28,7 @@ const features = [
   {
     title: 'Ordonnance électronique',
     description: 'Recevez et présentez vos ordonnances numériques directement depuis votre téléphone.',
-    icon: Pills
+    icon: Pill
   },
   {
     title: 'Renouvellement d\'ordonnance',
