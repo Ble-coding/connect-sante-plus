@@ -13,6 +13,7 @@ import AboutPage from "./pages/AboutPage";
 import ForPatientsPage from "./pages/ForPatientsPage";
 import ForDoctorsPage from "./pages/ForDoctorsPage";
 import ForPharmaciesPage from "./pages/ForPharmaciesPage";
+import HowItWorksPage from "./pages/HowItWorksPage";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/for-patients" element={<ForPatientsPage />} />
           <Route path="/for-doctors" element={<ForDoctorsPage />} />
           <Route path="/for-pharmacies" element={<ForPharmaciesPage />} />
