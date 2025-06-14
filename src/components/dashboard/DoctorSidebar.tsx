@@ -87,9 +87,11 @@ export function DoctorSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-            <Stethoscope className="h-5 w-5 text-blue-600" />
-          </div>
+          <img 
+            src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
+            alt="PharmaConnect" 
+            className="h-8 w-auto"
+          />
           <div>
             <h3 className="font-semibold text-sm">Dr. Marie Diallo</h3>
             <p className="text-xs text-muted-foreground">Médecin généraliste</p>

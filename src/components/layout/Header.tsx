@@ -18,9 +18,11 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pharma-primary to-pharma-secondary">
-              PharmaConnect
-            </span>
+            <img 
+              src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
+              alt="PharmaConnect" 
+              className="h-10 w-auto"
+            />
           </Link>
         </div>
 

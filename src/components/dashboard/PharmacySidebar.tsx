@@ -97,11 +97,12 @@ export function PharmacySidebar() {
     <Sidebar className="border-r">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-pharma-primary flex items-center justify-center">
-            <Pill className="h-5 w-5 text-white" />
-          </div>
+          <img 
+            src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
+            alt="PharmaConnect" 
+            className="h-8 w-auto"
+          />
           <div>
-            <h2 className="font-semibold text-pharma-primary">PharmaConnect</h2>
             <p className="text-xs text-gray-600">Espace Pharmacie</p>
           </div>
         </div>
