@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Package, 
   ShoppingCart, 
@@ -24,8 +25,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
-  SidebarFooter,
-  SidebarTrigger
+  SidebarFooter
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 
@@ -93,6 +93,8 @@ const menuItems = [
 ];
 
 export function PharmacySidebar() {
+  const location = useLocation();
+
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="p-4">
@@ -115,11 +117,11 @@ export function PharmacySidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-2">
+                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                    <Link to={item.url} className="flex items-center gap-2">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
