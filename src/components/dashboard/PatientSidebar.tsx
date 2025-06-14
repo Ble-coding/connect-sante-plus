@@ -1,82 +1,87 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
-  SidebarFooter,
-  SidebarTrigger,
+  SidebarRail,
 } from '@/components/ui/sidebar';
-import {
-  User,
-  Calendar,
-  FileText,
-  MapPin,
-  Bell,
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Calendar, 
+  FileText, 
+  Pill, 
+  MapPin, 
+  MessageSquare, 
+  Bell, 
+  History, 
   Settings,
-  LogOut,
-  Home,
-  Pill,
-  Clock,
-  MessageCircle
+  Scan,
+  Shield
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
-const mainMenuItems = [
+const menuItems = [
   {
-    title: "Tableau de bord",
+    title: "Vue d'ensemble",
+    icon: LayoutDashboard,
     url: "/dashboard",
-    icon: Home,
   },
   {
-    title: "Mes rendez-vous",
-    url: "/dashboard/appointments",
+    title: "Rendez-vous",
     icon: Calendar,
+    url: "/dashboard/appointments",
   },
   {
-    title: "Mes ordonnances",
-    url: "/dashboard/prescriptions",
+    title: "Ordonnances",
     icon: FileText,
+    url: "/dashboard/prescriptions",
   },
   {
-    title: "Mes médicaments",
-    url: "/dashboard/medications",
+    title: "Scanner ordonnance",
+    icon: Scan,
+    url: "/dashboard/scan-prescription",
+  },
+  {
+    title: "Médicaments",
     icon: Pill,
+    url: "/dashboard/medications",
   },
   {
-    title: "Historique médical",
-    url: "/dashboard/history",
-    icon: Clock,
-  },
-  {
-    title: "Pharmacies proches",
-    url: "/dashboard/pharmacies",
+    title: "Pharmacies",
     icon: MapPin,
+    url: "/dashboard/pharmacies",
+  },
+  {
+    title: "Assurances",
+    icon: Shield,
+    url: "/dashboard/insurance",
   },
   {
     title: "Messages",
+    icon: MessageSquare,
     url: "/dashboard/messages",
-    icon: MessageCircle,
   },
-];
-
-const settingsItems = [
   {
     title: "Notifications",
-    url: "/dashboard/notifications",
     icon: Bell,
+    url: "/dashboard/notifications",
+  },
+  {
+    title: "Historique",
+    icon: History,
+    url: "/dashboard/history",
   },
   {
     title: "Paramètres",
-    url: "/dashboard/settings",
     icon: Settings,
+    url: "/dashboard/settings",
   },
 ];
 
@@ -84,74 +89,42 @@ export function PatientSidebar() {
   const location = useLocation();
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b p-4">
-        <div className="flex items-center gap-3">
-          <img 
-            src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
-            alt="PharmaConnect" 
-            className="h-10 w-auto"
-          />
-          <div>
-            <h3 className="font-semibold text-sm">Jean Dupont</h3>
-            <p className="text-xs text-muted-foreground">Patient</p>
+    <Sidebar variant="inset">
+      <SidebarHeader className="h-16 flex items-center px-4">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="bg-primary text-primary-foreground rounded-lg p-2">
+            <Pill className="h-6 w-6" />
           </div>
-        </div>
+          <span className="font-bold text-lg">PharmaConnect</span>
+        </Link>
       </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu principal</SidebarGroupLabel>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainMenuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={location.pathname === item.url}
-                  >
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Paramètres</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {settingsItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={location.pathname === item.url}
-                  >
-                    <Link to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      className="w-full"
+                    >
+                      <Link to={item.url} className="flex items-center gap-2">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter className="border-t p-4">
-        <Button 
-          variant="ghost" 
-          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Déconnexion
-        </Button>
-      </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
