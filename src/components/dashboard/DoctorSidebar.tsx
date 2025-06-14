@@ -90,7 +90,7 @@ export function DoctorSidebar() {
           <img 
             src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
             alt="PharmaConnect" 
-            className="h-8 w-auto"
+            className="h-10 w-auto"
           />
           <div>
             <h3 className="font-semibold text-sm">Dr. Marie Diallo</h3>

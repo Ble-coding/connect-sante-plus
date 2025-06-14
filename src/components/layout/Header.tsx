@@ -21,7 +21,7 @@ const Header = () => {
             <img 
               src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
               alt="PharmaConnect" 
-              className="h-10 w-auto"
+              className="h-12 w-auto"
             />
           </Link>
         </div>
