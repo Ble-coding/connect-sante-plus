@@ -16,6 +16,8 @@ import {
   Plus,
   TrendingUp
 } from 'lucide-react';
+import { TeleconsultationModal } from '@/components/doctor/TeleconsultationModal';
+import { NewPatientModal } from '@/components/doctor/NewPatientModal';
 
 export function DoctorDashboardContent() {
   const todayAppointments = [
@@ -119,6 +121,11 @@ export function DoctorDashboardContent() {
     }
   };
 
+  const handlePatientAdded = (newPatient: any) => {
+    console.log('Nouveau patient ajouté:', newPatient);
+    // Ici on pourrait mettre à jour la liste des patients ou afficher une notification
+  };
+
   return (
     <SidebarInset>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -126,10 +133,25 @@ export function DoctorDashboardContent() {
         <div className="flex flex-1 items-center gap-2">
           <h1 className="text-lg font-semibold">Tableau de bord médecin</h1>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau patient
-        </Button>
+        <div className="flex gap-2">
+          <TeleconsultationModal
+            trigger={
+              <Button variant="outline">
+                <Video className="h-4 w-4 mr-2" />
+                Téléconsultation
+              </Button>
+            }
+          />
+          <NewPatientModal
+            trigger={
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nouveau patient
+              </Button>
+            }
+            onPatientAdded={handlePatientAdded}
+          />
+        </div>
       </header>
 
       <div className="flex-1 space-y-4 p-4 md:p-6">
@@ -236,9 +258,27 @@ export function DoctorDashboardContent() {
                       </Badge>
                     </div>
                   </div>
-                  <Button size="sm" variant="outline">
-                    Voir
-                  </Button>
+                  <div className="flex gap-1">
+                    {appointment.type === "Téléconsultation" && (
+                      <TeleconsultationModal
+                        trigger={
+                          <Button size="sm" variant="outline">
+                            <Video className="h-3 w-3 mr-1" />
+                            Démarrer
+                          </Button>
+                        }
+                        patient={{
+                          name: appointment.patient,
+                          age: 35,
+                          reason: "Consultation de suivi",
+                          scheduledTime: appointment.time
+                        }}
+                      />
+                    )}
+                    <Button size="sm" variant="outline">
+                      Voir
+                    </Button>
+                  </div>
                 </div>
               ))}
               <Button className="w-full" variant="outline">
@@ -314,23 +354,36 @@ export function DoctorDashboardContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <Button className="h-20 flex-col gap-2">
-                <Plus className="h-5 w-5" />
+                <Calendar className="h-5 w-5" />
                 <span className="text-xs">Nouveau RDV</span>
               </Button>
               <Button variant="outline" className="h-20 flex-col gap-2">
                 <FileText className="h-5 w-5" />
                 <span className="text-xs">Ordonnance</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col gap-2">
-                <Users className="h-5 w-5" />
-                <span className="text-xs">Nouveau patient</span>
-              </Button>
+              <NewPatientModal
+                trigger={
+                  <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Users className="h-5 w-5" />
+                    <span className="text-xs">Nouveau patient</span>
+                  </Button>
+                }
+                onPatientAdded={handlePatientAdded}
+              />
               <Button variant="outline" className="h-20 flex-col gap-2">
                 <Stethoscope className="h-5 w-5" />
                 <span className="text-xs">Consultation</span>
               </Button>
+              <TeleconsultationModal
+                trigger={
+                  <Button variant="outline" className="h-20 flex-col gap-2">
+                    <Video className="h-5 w-5" />
+                    <span className="text-xs">Téléconsultation</span>
+                  </Button>
+                }
+              />
             </div>
           </CardContent>
         </Card>
