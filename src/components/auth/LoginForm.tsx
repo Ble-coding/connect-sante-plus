@@ -20,14 +20,24 @@ const LoginForm = () => {
     setIsLoading(true);
     
     // In a real app, this would be an API call to authenticate the user
-    // For demo purposes, we'll just simulate a successful login
+    // For demo purposes, we'll simulate login based on email
     setTimeout(() => {
       toast({
         title: "Connexion réussie",
         description: "Vous êtes maintenant connecté à votre compte.",
       });
       setIsLoading(false);
-      navigate('/dashboard');
+      
+      // Route based on user type (demo logic)
+      if (email.includes('admin')) {
+        navigate('/admin-dashboard');
+      } else if (email.includes('doctor') || email.includes('dr')) {
+        navigate('/doctor-dashboard');
+      } else if (email.includes('pharmacy') || email.includes('pharmacie')) {
+        navigate('/pharmacy-dashboard');
+      } else {
+        navigate('/dashboard');
+      }
     }, 1500);
   };
 
@@ -51,6 +61,9 @@ const LoginForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
+          <p className="text-xs text-muted-foreground">
+            Demo: utilisez "admin@", "doctor@", "pharmacy@" ou "patient@" pour tester les différents tableaux de bord
+          </p>
         </div>
         
         <div className="space-y-2">
