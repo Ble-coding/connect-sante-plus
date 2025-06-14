@@ -211,7 +211,7 @@ const PharmacyReportsPage = () => {
               <span className="font-medium">4.2x/an</span>
             </div>
             <div className="flex justify-between">
-              <span>Stock mort (>6 mois):</span>
+              <span>Stock mort ({'>'}6 mois):</span>
               <span className="font-medium text-orange-600">2,340€</span>
             </div>
             <div className="flex justify-between">
