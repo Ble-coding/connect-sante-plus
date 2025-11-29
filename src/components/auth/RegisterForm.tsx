@@ -49,6 +49,34 @@ const RegisterForm = () => {
     
     setIsLoading(true);
     
+    // Déterminer le type d'utilisateur pour la redirection
+    let userTypeValue = 'patient';
+    let dashboardPath = '/dashboard';
+    
+    if (userType === 'doctor' || userType === 'médecin') {
+      userTypeValue = 'doctor';
+      dashboardPath = '/doctor-dashboard';
+    } else if (userType === 'pharmacist' || userType === 'pharmacien') {
+      userTypeValue = 'pharmacy';
+      dashboardPath = '/pharmacy-dashboard';
+    }
+    
+    // Créer la session utilisateur avec le nom
+    const session = {
+      email,
+      firstName: firstName || 'Utilisateur',
+      lastName,
+      userType: userTypeValue,
+      loginTime: new Date().toISOString(),
+      rememberMe: false
+    };
+    
+    // Sauvegarder dans localStorage
+    localStorage.setItem('pharmaconnect_user_session', JSON.stringify(session));
+    
+    // Sauvegarder dans localStorage
+    localStorage.setItem('pharmaconnect_user_session', JSON.stringify(session));
+    
     // In a real app, this would be an API call to register the user
     // For demo purposes, we'll just simulate a successful registration
     setTimeout(() => {

@@ -12,25 +12,28 @@ import { DoctorSchedulePage } from '@/pages/doctor/DoctorSchedulePage';
 import { DoctorReportsPage } from '@/pages/doctor/DoctorReportsPage';
 import { DoctorMessagesPage } from '@/pages/doctor/DoctorMessagesPage';
 import { DoctorSettingsPage } from '@/pages/doctor/DoctorSettingsPage';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const DoctorDashboardPage = () => {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <DoctorSidebar />
-        <Routes>
-          <Route path="/" element={<DoctorDashboardContent />} />
-          <Route path="/patients" element={<DoctorPatientsPage />} />
-          <Route path="/appointments" element={<DoctorAppointmentsPage />} />
-          <Route path="/prescriptions" element={<DoctorPrescriptionsPage />} />
-          <Route path="/consultations" element={<DoctorConsultationsPage />} />
-          <Route path="/schedule" element={<DoctorSchedulePage />} />
-          <Route path="/reports" element={<DoctorReportsPage />} />
-          <Route path="/messages" element={<DoctorMessagesPage />} />
-          <Route path="/settings" element={<DoctorSettingsPage />} />
-        </Routes>
-      </div>
-    </SidebarProvider>
+    <ProtectedRoute allowedUserTypes={['doctor']}>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <DoctorSidebar />
+          <Routes>
+            <Route index element={<DoctorDashboardContent />} />
+            <Route path="patients" element={<DoctorPatientsPage />} />
+            <Route path="appointments" element={<DoctorAppointmentsPage />} />
+            <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
+            <Route path="consultations" element={<DoctorConsultationsPage />} />
+            <Route path="schedule" element={<DoctorSchedulePage />} />
+            <Route path="reports" element={<DoctorReportsPage />} />
+            <Route path="messages" element={<DoctorMessagesPage />} />
+            <Route path="settings" element={<DoctorSettingsPage />} />
+          </Routes>
+        </div>
+      </SidebarProvider>
+    </ProtectedRoute>
   );
 };
 

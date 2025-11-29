@@ -92,9 +92,11 @@ export function PatientSidebar() {
     <Sidebar variant="inset">
       <SidebarHeader className="h-16 flex items-center px-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="bg-primary text-primary-foreground rounded-lg p-2">
-            <Pill className="h-6 w-6" />
-          </div>
+          <img 
+            src="/Tech Company Logo Emphasizing Health (5).png" 
+            alt="PharmaConnect" 
+            className="h-14 w-auto"
+          />
           <span className="font-bold text-lg">PharmaConnect</span>
         </Link>
       </SidebarHeader>

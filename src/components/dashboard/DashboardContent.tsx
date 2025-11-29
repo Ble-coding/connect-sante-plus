@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,8 +15,26 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
+import { AppointmentModal } from '@/components/appointments/AppointmentModal';
 
 export function DashboardContent() {
+  const navigate = useNavigate();
+  const [userName, setUserName] = useState('Utilisateur');
+
+  // Charger le nom de l'utilisateur depuis la session
+  useEffect(() => {
+    const session = localStorage.getItem('pharmaconnect_user_session');
+    if (session) {
+      try {
+        const sessionData = JSON.parse(session);
+        if (sessionData.firstName) {
+          setUserName(sessionData.firstName);
+        }
+      } catch (e) {
+        console.error('Erreur lors du chargement de la session:', e);
+      }
+    }
+  }, []);
   const upcomingAppointments = [
     {
       id: 1,
@@ -89,7 +108,7 @@ export function DashboardContent() {
         {/* Welcome Section */}
         <div className="grid gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Bonjour Jean ! 👋</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Bonjour {userName} ! 👋</h2>
             <p className="text-muted-foreground">
               Voici un aperçu de votre santé aujourd'hui.
             </p>
@@ -187,10 +206,15 @@ export function DashboardContent() {
                   </Badge>
                 </div>
               ))}
-              <Button className="w-full" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Prendre un rendez-vous
-              </Button>
+              <AppointmentModal
+                trigger={
+                  <Button className="w-full" variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Prendre un rendez-vous
+                  </Button>
+                }
+                onSave={() => window.location.reload()}
+              />
             </CardContent>
           </Card>
 
@@ -218,7 +242,11 @@ export function DashboardContent() {
                   </Badge>
                 </div>
               ))}
-              <Button className="w-full" variant="outline">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate('/dashboard/prescriptions')}
+              >
                 Voir toutes les ordonnances
               </Button>
             </CardContent>
@@ -255,7 +283,11 @@ export function DashboardContent() {
                   </div>
                 </div>
               ))}
-              <Button className="w-full" variant="outline">
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => navigate('/dashboard/medications')}
+              >
                 Gérer mes médicaments
               </Button>
             </CardContent>

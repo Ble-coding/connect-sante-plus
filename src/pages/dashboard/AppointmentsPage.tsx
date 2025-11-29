@@ -1,71 +1,154 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Video, MapPin, Plus, Filter, Search } from 'lucide-react';
+import { Calendar, Clock, Video, MapPin, Plus, Filter, Search, Edit } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AppointmentModal } from '@/components/appointments/AppointmentModal';
+import { useToast } from '@/components/ui/use-toast';
+
+interface Appointment {
+  id: number;
+  doctor: string;
+  specialty: string;
+  date: string;
+  time: string;
+  type: string;
+  location: string;
+  status: string;
+}
 
 export function AppointmentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { toast } = useToast();
 
-  const upcomingAppointments = [
-    {
-      id: 1,
-      doctor: "Dr. Marie Diallo",
-      specialty: "Médecin généraliste",
-      date: "15 Juin 2024",
-      time: "14:30",
-      type: "Consultation",
-      location: "Cabinet médical - 123 Rue de la Santé",
-      status: "confirmé"
-    },
-    {
-      id: 2,
-      doctor: "Dr. Ahmed Kone",
-      specialty: "Cardiologue",
-      date: "20 Juin 2024",
-      time: "10:00",
-      type: "Téléconsultation",
-      location: "En ligne",
-      status: "confirmé"
-    },
-    {
-      id: 3,
-      doctor: "Dr. Sophie Martin",
-      specialty: "Dermatologue",
-      date: "25 Juin 2024",
-      time: "16:00",
-      type: "Consultation",
-      location: "Clinique dermatologique",
-      status: "en_attente"
+  // Charger les rendez-vous depuis localStorage
+  const loadAppointments = () => {
+    const saved = localStorage.getItem('pharmaconnect_appointments');
+    if (saved) {
+      return JSON.parse(saved);
     }
-  ];
+    return [
+      {
+        id: 1,
+        doctor: "Dr. Marie Diallo",
+        specialty: "Médecin généraliste",
+        date: "2024-06-15",
+        time: "14:30",
+        type: "Consultation",
+        location: "Cabinet médical - 123 Rue de la Santé",
+        status: "confirmé"
+      },
+      {
+        id: 2,
+        doctor: "Dr. Ahmed Kone",
+        specialty: "Cardiologue",
+        date: "2024-06-20",
+        time: "10:00",
+        type: "Téléconsultation",
+        location: "En ligne",
+        status: "confirmé"
+      },
+      {
+        id: 3,
+        doctor: "Dr. Sophie Martin",
+        specialty: "Dermatologue",
+        date: "2024-06-25",
+        time: "16:00",
+        type: "Consultation",
+        location: "Clinique dermatologique",
+        status: "en_attente"
+      },
+      {
+        id: 4,
+        doctor: "Dr. Marie Diallo",
+        specialty: "Médecin généraliste",
+        date: "2024-06-10",
+        time: "14:30",
+        type: "Consultation",
+        location: "Cabinet médical",
+        status: "terminé"
+      },
+      {
+        id: 5,
+        doctor: "Dr. Paul Dubois",
+        specialty: "Ophtalmologue",
+        date: "2024-06-05",
+        time: "09:15",
+        type: "Consultation",
+        location: "Centre ophtalmologique",
+        status: "terminé"
+      }
+    ];
+  };
 
-  const pastAppointments = [
-    {
-      id: 4,
-      doctor: "Dr. Marie Diallo",
-      specialty: "Médecin généraliste",
-      date: "10 Juin 2024",
-      time: "14:30",
-      type: "Consultation",
-      location: "Cabinet médical",
-      status: "terminé"
-    },
-    {
-      id: 5,
-      doctor: "Dr. Paul Dubois",
-      specialty: "Ophtalmologue",
-      date: "5 Juin 2024",
-      time: "09:15",
-      type: "Consultation",
-      location: "Centre ophtalmologique",
-      status: "terminé"
-    }
-  ];
+  const [allAppointments, setAllAppointments] = useState<Appointment[]>(loadAppointments());
+
+  // Séparer les rendez-vous à venir et passés (recalculé à chaque changement)
+  const { upcomingAppointments, pastAppointments } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const upcoming = allAppointments.filter(apt => {
+      const aptDate = new Date(apt.date);
+      aptDate.setHours(0, 0, 0, 0);
+      return apt.status !== 'terminé' && aptDate >= today;
+    });
+
+    const past = allAppointments.filter(apt => {
+      const aptDate = new Date(apt.date);
+      aptDate.setHours(0, 0, 0, 0);
+      return apt.status === 'terminé' || aptDate < today;
+    });
+
+    return { upcomingAppointments: upcoming, pastAppointments: past };
+  }, [allAppointments]);
+
+  const handleSaveAppointment = (appointment: Appointment) => {
+    // Recharger les rendez-vous depuis localStorage
+    const updated = loadAppointments();
+    setAllAppointments(updated);
+    setIsModalOpen(false);
+    setSelectedAppointment(null);
+  };
+  
+  // Recharger les rendez-vous quand le composant se monte ou quand localStorage change
+  useEffect(() => {
+    const handleAppointmentsUpdate = () => {
+      setAllAppointments(loadAppointments());
+    };
+    
+    // Écouter l'événement personnalisé
+    window.addEventListener('appointments-updated', handleAppointmentsUpdate);
+    
+    // Écouter les changements dans localStorage (pour les autres onglets)
+    window.addEventListener('storage', handleAppointmentsUpdate);
+    
+    return () => {
+      window.removeEventListener('appointments-updated', handleAppointmentsUpdate);
+      window.removeEventListener('storage', handleAppointmentsUpdate);
+    };
+  }, []);
+
+  const handleEdit = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (id: number) => {
+    const updated = allAppointments.filter(apt => apt.id !== id);
+    setAllAppointments(updated);
+    localStorage.setItem('pharmaconnect_appointments', JSON.stringify(updated));
+    toast({
+      title: "Rendez-vous supprimé",
+      description: "Le rendez-vous a été supprimé avec succès.",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -80,6 +163,19 @@ export function AppointmentsPage() {
     return type === 'Téléconsultation' ? Video : MapPin;
   };
 
+  // Filtrer les rendez-vous selon la recherche
+  const filteredUpcoming = upcomingAppointments.filter(apt =>
+    apt.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    apt.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    apt.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredPast = pastAppointments.filter(apt =>
+    apt.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    apt.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    apt.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <SidebarInset>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -87,10 +183,15 @@ export function AppointmentsPage() {
         <div className="flex flex-1 items-center gap-2">
           <h1 className="text-lg font-semibold">Mes rendez-vous</h1>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau RDV
-        </Button>
+        <AppointmentModal
+          trigger={
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Nouveau RDV
+            </Button>
+          }
+          onSave={handleSaveAppointment}
+        />
       </header>
 
       <div className="flex-1 space-y-4 p-4 md:p-6">
@@ -113,12 +214,12 @@ export function AppointmentsPage() {
 
         <Tabs defaultValue="upcoming" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="upcoming">À venir ({upcomingAppointments.length})</TabsTrigger>
-            <TabsTrigger value="past">Passés ({pastAppointments.length})</TabsTrigger>
+            <TabsTrigger value="upcoming">À venir ({filteredUpcoming.length})</TabsTrigger>
+            <TabsTrigger value="past">Passés ({filteredPast.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="upcoming" className="space-y-4">
-            {upcomingAppointments.map((appointment) => {
+            {filteredUpcoming.map((appointment) => {
               const TypeIcon = getTypeIcon(appointment.type);
               return (
                 <Card key={appointment.id}>
@@ -135,7 +236,7 @@ export function AppointmentsPage() {
                         <div className="flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {appointment.date}
+                            {new Date(appointment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
@@ -148,10 +249,29 @@ export function AppointmentsPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          Modifier
-                        </Button>
-                        <Button size="sm">
+                        <AppointmentModal
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4 mr-1" />
+                              Modifier
+                            </Button>
+                          }
+                          appointment={appointment}
+                          onSave={handleSaveAppointment}
+                        />
+                        <Button size="sm" onClick={() => {
+                          if (appointment.type === 'Téléconsultation') {
+                            toast({
+                              title: "Téléconsultation",
+                              description: "Fonctionnalité de téléconsultation en développement",
+                            });
+                          } else {
+                            toast({
+                              title: "Détails",
+                              description: `Rendez-vous avec ${appointment.doctor} le ${new Date(appointment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} à ${appointment.time}`,
+                            });
+                          }
+                        }}>
                           {appointment.type === 'Téléconsultation' ? 'Rejoindre' : 'Détails'}
                         </Button>
                       </div>
@@ -163,7 +283,7 @@ export function AppointmentsPage() {
           </TabsContent>
 
           <TabsContent value="past" className="space-y-4">
-            {pastAppointments.map((appointment) => {
+            {filteredPast.map((appointment) => {
               const TypeIcon = getTypeIcon(appointment.type);
               return (
                 <Card key={appointment.id}>
@@ -180,7 +300,7 @@ export function AppointmentsPage() {
                         <div className="flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {appointment.date}
+                            {new Date(appointment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
@@ -193,12 +313,23 @@ export function AppointmentsPage() {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => {
+                          toast({
+                            title: "Détails",
+                            description: `Rendez-vous avec ${appointment.doctor} le ${appointment.date} à ${appointment.time}`,
+                          });
+                        }}>
                           Voir détails
                         </Button>
-                        <Button variant="outline" size="sm">
-                          Reprendre RDV
-                        </Button>
+                        <AppointmentModal
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              Reprendre RDV
+                            </Button>
+                          }
+                          appointment={{...appointment, status: 'en_attente'}}
+                          onSave={handleSaveAppointment}
+                        />
                       </div>
                     </div>
                   </CardContent>

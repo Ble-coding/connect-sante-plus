@@ -101,9 +101,9 @@ export function AdminSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
           <img 
-            src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
+            src="/Tech Company Logo Emphasizing Health (5).png" 
             alt="PharmaConnect" 
-            className="h-10 w-auto"
+            className="h-14 w-auto"
           />
           <div>
             <div className="flex items-center gap-1">

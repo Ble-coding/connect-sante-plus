@@ -7,7 +7,7 @@ const AboutHero = () => {
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center text-center">
           <img 
-            src="/lovable-uploads/c1bd51ec-1648-40dd-aacd-3af632c6f816.png" 
+            src="/Tech Company Logo Emphasizing Health (5).png" 
             alt="PharmaConnect Logo" 
             className="h-32 md:h-40 mb-8" 
           />

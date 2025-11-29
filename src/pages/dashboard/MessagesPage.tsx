@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,103 +9,184 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
+interface Message {
+  id: number;
+  sender: string;
+  content: string;
+  timestamp: string;
+  isDoctor: boolean;
+}
+
+interface Conversation {
+  id: number;
+  name: string;
+  specialty: string;
+  lastMessage: string;
+  timestamp: string;
+  unread: number;
+  online: boolean;
+}
+
 export function MessagesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<number | null>(1);
   const [newMessage, setNewMessage] = useState('');
 
-  const conversations = [
-    {
-      id: 1,
-      name: "Dr. Marie Diallo",
-      specialty: "Médecin généraliste",
-      lastMessage: "Merci pour les résultats. Tout semble normal.",
-      timestamp: "Il y a 2h",
-      unread: 0,
-      online: true
-    },
-    {
-      id: 2,
-      name: "Dr. Ahmed Kone",
-      specialty: "Cardiologue",
-      lastMessage: "Votre prochain RDV est confirmé pour le 20 juin.",
-      timestamp: "Hier",
-      unread: 1,
-      online: false
-    },
-    {
-      id: 3,
-      name: "Pharmacie du Centre",
-      specialty: "Pharmacie",
-      lastMessage: "Vos médicaments sont prêts pour retrait.",
-      timestamp: "Il y a 3 jours",
-      unread: 0,
-      online: true
-    },
-    {
-      id: 4,
-      name: "Dr. Sophie Martin",
-      specialty: "Dermatologue",
-      lastMessage: "N'hésitez pas si vous avez des questions.",
-      timestamp: "Il y a 1 semaine",
-      unread: 2,
-      online: false
+  // Charger les conversations depuis localStorage ou utiliser les données par défaut
+  const loadConversations = (): Conversation[] => {
+    const saved = localStorage.getItem('pharmaconnect_conversations');
+    if (saved) {
+      return JSON.parse(saved);
     }
-  ];
+    return [
+      {
+        id: 1,
+        name: "Dr. Marie Diallo",
+        specialty: "Médecin généraliste",
+        lastMessage: "Merci pour les résultats. Tout semble normal.",
+        timestamp: "Il y a 2h",
+        unread: 0,
+        online: true
+      },
+      {
+        id: 2,
+        name: "Dr. Ahmed Kone",
+        specialty: "Cardiologue",
+        lastMessage: "Votre prochain RDV est confirmé pour le 20 juin.",
+        timestamp: "Hier",
+        unread: 1,
+        online: false
+      },
+      {
+        id: 3,
+        name: "Pharmacie du Centre",
+        specialty: "Pharmacie",
+        lastMessage: "Vos médicaments sont prêts pour retrait.",
+        timestamp: "Il y a 3 jours",
+        unread: 0,
+        online: true
+      },
+      {
+        id: 4,
+        name: "Dr. Sophie Martin",
+        specialty: "Dermatologue",
+        lastMessage: "N'hésitez pas si vous avez des questions.",
+        timestamp: "Il y a 1 semaine",
+        unread: 2,
+        online: false
+      }
+    ];
+  };
 
-  const messages = [
-    {
-      id: 1,
-      sender: "Dr. Marie Diallo",
-      content: "Bonjour Jean, j'ai bien reçu vos résultats d'analyses. Tout semble être dans les normes.",
-      timestamp: "14:30",
-      isDoctor: true
-    },
-    {
-      id: 2,
-      sender: "Vous",
-      content: "Merci docteur ! Est-ce que je dois continuer le traitement comme prévu ?",
-      timestamp: "14:45",
-      isDoctor: false
-    },
-    {
-      id: 3,
-      sender: "Dr. Marie Diallo",
-      content: "Oui, continuez exactement comme prescrit. Le paracétamol peut être arrêté dès que vous vous sentez mieux.",
-      timestamp: "14:50",
-      isDoctor: true
-    },
-    {
-      id: 4,
-      sender: "Dr. Marie Diallo",
-      content: "Pour l'amoxicilline, il est important de terminer tout le traitement même si vous vous sentez mieux.",
-      timestamp: "14:51",
-      isDoctor: true
-    },
-    {
-      id: 5,
-      sender: "Vous",
-      content: "D'accord, je note. Merci pour vos conseils !",
-      timestamp: "15:00",
-      isDoctor: false
-    },
-    {
-      id: 6,
-      sender: "Dr. Marie Diallo",
-      content: "Merci pour les résultats. Tout semble normal.",
-      timestamp: "16:30",
-      isDoctor: true
+  // Charger les messages depuis localStorage ou utiliser les données par défaut
+  const loadMessages = (conversationId: number): Message[] => {
+    const saved = localStorage.getItem(`pharmaconnect_messages_${conversationId}`);
+    if (saved) {
+      return JSON.parse(saved);
     }
-  ];
+    if (conversationId === 1) {
+      return [
+        {
+          id: 1,
+          sender: "Dr. Marie Diallo",
+          content: "Bonjour Jean, j'ai bien reçu vos résultats d'analyses. Tout semble être dans les normes.",
+          timestamp: "14:30",
+          isDoctor: true
+        },
+        {
+          id: 2,
+          sender: "Vous",
+          content: "Merci docteur ! Est-ce que je dois continuer le traitement comme prévu ?",
+          timestamp: "14:45",
+          isDoctor: false
+        },
+        {
+          id: 3,
+          sender: "Dr. Marie Diallo",
+          content: "Oui, continuez exactement comme prescrit. Le paracétamol peut être arrêté dès que vous vous sentez mieux.",
+          timestamp: "14:50",
+          isDoctor: true
+        },
+        {
+          id: 4,
+          sender: "Dr. Marie Diallo",
+          content: "Pour l'amoxicilline, il est important de terminer tout le traitement même si vous vous sentez mieux.",
+          timestamp: "14:51",
+          isDoctor: true
+        },
+        {
+          id: 5,
+          sender: "Vous",
+          content: "D'accord, je note. Merci pour vos conseils !",
+          timestamp: "15:00",
+          isDoctor: false
+        },
+        {
+          id: 6,
+          sender: "Dr. Marie Diallo",
+          content: "Merci pour les résultats. Tout semble normal.",
+          timestamp: "16:30",
+          isDoctor: true
+        }
+      ];
+    }
+    return [];
+  };
+
+  const [conversations, setConversations] = useState<Conversation[]>(loadConversations());
+  const [messages, setMessages] = useState<Message[]>(selectedConversation ? loadMessages(selectedConversation) : []);
+
+  // Mettre à jour les messages quand la conversation change
+  useEffect(() => {
+    if (selectedConversation) {
+      setMessages(loadMessages(selectedConversation));
+    }
+  }, [selectedConversation]);
 
   const selectedConversationData = conversations.find(c => c.id === selectedConversation);
 
   const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      console.log('Sending message:', newMessage);
+    if (newMessage.trim() && selectedConversation) {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      
+      const newMsg: Message = {
+        id: Date.now(),
+        sender: "Vous",
+        content: newMessage.trim(),
+        timestamp: timeString,
+        isDoctor: false
+      };
+
+      const updatedMessages = [...messages, newMsg];
+      setMessages(updatedMessages);
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem(`pharmaconnect_messages_${selectedConversation}`, JSON.stringify(updatedMessages));
+      
+      // Mettre à jour la dernière conversation
+      const updatedConversations = conversations.map(conv => {
+        if (conv.id === selectedConversation) {
+          return {
+            ...conv,
+            lastMessage: newMessage.trim(),
+            timestamp: "À l'instant"
+          };
+        }
+        return conv;
+      });
+      setConversations(updatedConversations);
+      localStorage.setItem('pharmaconnect_conversations', JSON.stringify(updatedConversations));
+      
       setNewMessage('');
     }
   };
+
+  // Filtrer les conversations selon la recherche
+  const filteredConversations = conversations.filter(conv =>
+    conv.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conv.specialty.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <SidebarInset>
@@ -136,7 +217,7 @@ export function MessagesPage() {
           </div>
           
           <div className="overflow-y-auto">
-            {conversations.map((conversation) => (
+            {filteredConversations.map((conversation) => (
               <div
                 key={conversation.id}
                 className={`p-4 border-b cursor-pointer hover:bg-muted/40 transition-colors ${

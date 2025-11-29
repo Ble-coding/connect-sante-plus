@@ -14,27 +14,30 @@ import { HistoryPage } from './dashboard/HistoryPage';
 import { SettingsPage } from './dashboard/SettingsPage';
 import { ScanPrescriptionPage } from './dashboard/ScanPrescriptionPage';
 import { InsurancePage } from './dashboard/InsurancePage';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const DashboardPage = () => {
   return (
-    <div className="min-h-screen flex w-full">
-      <SidebarProvider>
-        <PatientSidebar />
-        <Routes>
-          <Route index element={<DashboardContent />} />
-          <Route path="appointments" element={<AppointmentsPage />} />
-          <Route path="prescriptions" element={<PrescriptionsPage />} />
-          <Route path="scan-prescription" element={<ScanPrescriptionPage />} />
-          <Route path="medications" element={<MedicationsPage />} />
-          <Route path="pharmacies" element={<PharmaciesPage />} />
-          <Route path="insurance" element={<InsurancePage />} />
-          <Route path="messages" element={<MessagesPage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="history" element={<HistoryPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Routes>
-      </SidebarProvider>
-    </div>
+    <ProtectedRoute allowedUserTypes={['patient']}>
+      <div className="min-h-screen flex w-full">
+        <SidebarProvider>
+          <PatientSidebar />
+          <Routes>
+            <Route index element={<DashboardContent />} />
+            <Route path="appointments" element={<AppointmentsPage />} />
+            <Route path="prescriptions" element={<PrescriptionsPage />} />
+            <Route path="scan-prescription" element={<ScanPrescriptionPage />} />
+            <Route path="medications" element={<MedicationsPage />} />
+            <Route path="pharmacies" element={<PharmaciesPage />} />
+            <Route path="insurance" element={<InsurancePage />} />
+            <Route path="messages" element={<MessagesPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="history" element={<HistoryPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Routes>
+        </SidebarProvider>
+      </div>
+    </ProtectedRoute>
   );
 };
 

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,99 +9,140 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 
+interface Medication {
+  id: number;
+  name: string;
+  dosage: string;
+  frequency: string;
+  nextDose: string;
+  lastTaken: string;
+  remainingDoses: number;
+  totalDoses: number;
+  startDate: string;
+  endDate: string;
+  reminders: boolean;
+  status: string;
+}
+
+interface ScheduleDose {
+  id: number;
+  name: string;
+  dosage: string;
+  time: string;
+  taken: boolean;
+  overdue?: boolean;
+}
+
 export function MedicationsPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const currentMedications = [
-    {
-      id: 1,
-      name: "Paracétamol",
-      dosage: "500mg",
-      frequency: "3 fois par jour",
-      nextDose: "14:00",
-      lastTaken: "08:00",
-      remainingDoses: 15,
-      totalDoses: 21,
-      startDate: "10 Juin 2024",
-      endDate: "17 Juin 2024",
-      reminders: true,
-      status: "en_cours"
-    },
-    {
-      id: 2,
-      name: "Amoxicilline",
-      dosage: "250mg",
-      frequency: "2 fois par jour",
-      nextDose: "20:00",
-      lastTaken: "08:00",
-      remainingDoses: 12,
-      totalDoses: 20,
-      startDate: "10 Juin 2024",
-      endDate: "20 Juin 2024",
-      reminders: true,
-      status: "en_cours"
-    },
-    {
-      id: 3,
-      name: "Vitamine D",
-      dosage: "1000 UI",
-      frequency: "1 fois par jour",
-      nextDose: "08:00",
-      lastTaken: "hier 08:00",
-      remainingDoses: 25,
-      totalDoses: 30,
-      startDate: "10 Juin 2024",
-      endDate: "10 Juillet 2024",
-      reminders: false,
-      status: "en_retard"
+  // Charger les médicaments depuis localStorage
+  const loadMedications = (): Medication[] => {
+    const saved = localStorage.getItem('pharmaconnect_medications');
+    if (saved) {
+      return JSON.parse(saved);
     }
-  ];
+    return [
+      {
+        id: 1,
+        name: "Paracétamol",
+        dosage: "500mg",
+        frequency: "3 fois par jour",
+        nextDose: "14:00",
+        lastTaken: "08:00",
+        remainingDoses: 15,
+        totalDoses: 21,
+        startDate: "10 Juin 2024",
+        endDate: "17 Juin 2024",
+        reminders: true,
+        status: "en_cours"
+      },
+      {
+        id: 2,
+        name: "Amoxicilline",
+        dosage: "250mg",
+        frequency: "2 fois par jour",
+        nextDose: "20:00",
+        lastTaken: "08:00",
+        remainingDoses: 12,
+        totalDoses: 20,
+        startDate: "10 Juin 2024",
+        endDate: "20 Juin 2024",
+        reminders: true,
+        status: "en_cours"
+      },
+      {
+        id: 3,
+        name: "Vitamine D",
+        dosage: "1000 UI",
+        frequency: "1 fois par jour",
+        nextDose: "08:00",
+        lastTaken: "hier 08:00",
+        remainingDoses: 25,
+        totalDoses: 30,
+        startDate: "10 Juin 2024",
+        endDate: "10 Juillet 2024",
+        reminders: false,
+        status: "en_retard"
+      }
+    ];
+  };
 
-  const todaySchedule = [
-    {
-      id: 1,
-      name: "Paracétamol",
-      dosage: "500mg",
-      time: "08:00",
-      taken: true
-    },
-    {
-      id: 2,
-      name: "Amoxicilline",
-      dosage: "250mg",
-      time: "08:00",
-      taken: true
-    },
-    {
-      id: 3,
-      name: "Paracétamol",
-      dosage: "500mg",
-      time: "14:00",
-      taken: false
-    },
-    {
-      id: 4,
-      name: "Vitamine D",
-      dosage: "1000 UI",
-      time: "08:00",
-      taken: false,
-      overdue: true
-    },
-    {
-      id: 5,
-      name: "Paracétamol",
-      dosage: "500mg",
-      time: "20:00",
-      taken: false
-    },
-    {
-      id: 6,
-      name: "Amoxicilline",
-      dosage: "250mg",
-      time: "20:00",
-      taken: false
+  // Charger le planning du jour depuis localStorage
+  const loadTodaySchedule = (): ScheduleDose[] => {
+    const saved = localStorage.getItem('pharmaconnect_schedule_' + new Date().toDateString());
+    if (saved) {
+      return JSON.parse(saved);
     }
-  ];
+    return [
+      {
+        id: 1,
+        name: "Paracétamol",
+        dosage: "500mg",
+        time: "08:00",
+        taken: true
+      },
+      {
+        id: 2,
+        name: "Amoxicilline",
+        dosage: "250mg",
+        time: "08:00",
+        taken: true
+      },
+      {
+        id: 3,
+        name: "Paracétamol",
+        dosage: "500mg",
+        time: "14:00",
+        taken: false
+      },
+      {
+        id: 4,
+        name: "Vitamine D",
+        dosage: "1000 UI",
+        time: "08:00",
+        taken: false,
+        overdue: true
+      },
+      {
+        id: 5,
+        name: "Paracétamol",
+        dosage: "500mg",
+        time: "20:00",
+        taken: false
+      },
+      {
+        id: 6,
+        name: "Amoxicilline",
+        dosage: "250mg",
+        time: "20:00",
+        taken: false
+      }
+    ];
+  };
+
+  const [currentMedications, setCurrentMedications] = useState<Medication[]>(loadMedications());
+  const [todaySchedule, setTodaySchedule] = useState<ScheduleDose[]>(loadTodaySchedule());
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -122,12 +163,53 @@ export function MedicationsPage() {
   };
 
   const handleToggleReminder = (medicationId: number) => {
-    console.log(`Toggle reminder for medication ${medicationId}`);
+    const updated = currentMedications.map(med => {
+      if (med.id === medicationId) {
+        return { ...med, reminders: !med.reminders };
+      }
+      return med;
+    });
+    setCurrentMedications(updated);
+    localStorage.setItem('pharmaconnect_medications', JSON.stringify(updated));
   };
 
   const handleMarkAsTaken = (scheduleId: number) => {
-    console.log(`Mark dose ${scheduleId} as taken`);
+    const updated = todaySchedule.map(dose => {
+      if (dose.id === scheduleId) {
+        return { ...dose, taken: true, overdue: false };
+      }
+      return dose;
+    });
+    setTodaySchedule(updated);
+    localStorage.setItem('pharmaconnect_schedule_' + new Date().toDateString(), JSON.stringify(updated));
+    
+    // Mettre à jour le médicament correspondant
+    const dose = todaySchedule.find(d => d.id === scheduleId);
+    if (dose) {
+      const updatedMeds = currentMedications.map(med => {
+        if (med.name === dose.name) {
+          const newRemaining = Math.max(0, med.remainingDoses - 1);
+          const now = new Date();
+          const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+          return {
+            ...med,
+            remainingDoses: newRemaining,
+            lastTaken: timeString,
+            status: newRemaining === 0 ? 'terminé' : med.status
+          };
+        }
+        return med;
+      });
+      setCurrentMedications(updatedMeds);
+      localStorage.setItem('pharmaconnect_medications', JSON.stringify(updatedMeds));
+    }
   };
+
+  // Filtrer les médicaments selon la recherche
+  const filteredMedications = currentMedications.filter(med =>
+    med.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    med.dosage.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <SidebarInset>
@@ -161,7 +243,7 @@ export function MedicationsPage() {
           </TabsList>
 
           <TabsContent value="current" className="space-y-4">
-            {currentMedications.map((medication) => (
+            {filteredMedications.map((medication) => (
               <Card key={medication.id}>
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">

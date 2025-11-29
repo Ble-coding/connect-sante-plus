@@ -15,30 +15,33 @@ import { AdminAlertsPage } from './admin/AdminAlertsPage';
 import { AdminMessagesPage } from './admin/AdminMessagesPage';
 import { AdminNotificationsPage } from './admin/AdminNotificationsPage';
 import { AdminSettingsPage } from './admin/AdminSettingsPage';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const AdminDashboardPage = () => {
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AdminSidebar />
-        <SidebarInset className="flex-1">
-          <Routes>
-            <Route index element={<AdminDashboardContent />} />
-            <Route path="users" element={<AdminUsersPage />} />
-            <Route path="pharmacies" element={<AdminPharmaciesPage />} />
-            <Route path="doctors" element={<AdminDoctorsPage />} />
-            <Route path="analytics" element={<AdminAnalyticsPage />} />
-            <Route path="reports" element={<AdminReportsPage />} />
-            <Route path="activity" element={<AdminActivityPage />} />
-            <Route path="database" element={<AdminDatabasePage />} />
-            <Route path="alerts" element={<AdminAlertsPage />} />
-            <Route path="messages" element={<AdminMessagesPage />} />
-            <Route path="notifications" element={<AdminNotificationsPage />} />
-            <Route path="settings" element={<AdminSettingsPage />} />
-          </Routes>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <ProtectedRoute allowedUserTypes={['admin']}>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <AdminSidebar />
+          <SidebarInset className="flex-1">
+            <Routes>
+              <Route index element={<AdminDashboardContent />} />
+              <Route path="users" element={<AdminUsersPage />} />
+              <Route path="pharmacies" element={<AdminPharmaciesPage />} />
+              <Route path="doctors" element={<AdminDoctorsPage />} />
+              <Route path="analytics" element={<AdminAnalyticsPage />} />
+              <Route path="reports" element={<AdminReportsPage />} />
+              <Route path="activity" element={<AdminActivityPage />} />
+              <Route path="database" element={<AdminDatabasePage />} />
+              <Route path="alerts" element={<AdminAlertsPage />} />
+              <Route path="messages" element={<AdminMessagesPage />} />
+              <Route path="notifications" element={<AdminNotificationsPage />} />
+              <Route path="settings" element={<AdminSettingsPage />} />
+            </Routes>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </ProtectedRoute>
   );
 };
 

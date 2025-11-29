@@ -15,30 +15,33 @@ import PharmacyReportsPage from './pharmacy/PharmacyReportsPage';
 import PharmacyMessagesPage from './pharmacy/PharmacyMessagesPage';
 import PharmacyNotificationsPage from './pharmacy/PharmacyNotificationsPage';
 import PharmacySettingsPage from './pharmacy/PharmacySettingsPage';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 const PharmacyDashboardPage = () => {
   return (
-    <div className="min-h-screen flex w-full">
-      <SidebarProvider>
-        <PharmacySidebar />
-        <main className="flex-1 overflow-auto">
-          <Routes>
-            <Route index element={<PharmacyDashboardContent />} />
-            <Route path="inventory" element={<PharmacyInventoryPage />} />
-            <Route path="orders" element={<PharmacyOrdersPage />} />
-            <Route path="prescriptions" element={<PharmacyPrescriptionsPage />} />
-            <Route path="customers" element={<PharmacyCustomersPage />} />
-            <Route path="medications" element={<PharmacyMedicationsPage />} />
-            <Route path="schedule" element={<PharmacySchedulePage />} />
-            <Route path="location" element={<PharmacyLocationPage />} />
-            <Route path="reports" element={<PharmacyReportsPage />} />
-            <Route path="messages" element={<PharmacyMessagesPage />} />
-            <Route path="notifications" element={<PharmacyNotificationsPage />} />
-            <Route path="settings" element={<PharmacySettingsPage />} />
-          </Routes>
-        </main>
-      </SidebarProvider>
-    </div>
+    <ProtectedRoute allowedUserTypes={['pharmacy']}>
+      <div className="min-h-screen flex w-full">
+        <SidebarProvider>
+          <PharmacySidebar />
+          <main className="flex-1 overflow-auto">
+            <Routes>
+              <Route index element={<PharmacyDashboardContent />} />
+              <Route path="inventory" element={<PharmacyInventoryPage />} />
+              <Route path="orders" element={<PharmacyOrdersPage />} />
+              <Route path="prescriptions" element={<PharmacyPrescriptionsPage />} />
+              <Route path="customers" element={<PharmacyCustomersPage />} />
+              <Route path="medications" element={<PharmacyMedicationsPage />} />
+              <Route path="schedule" element={<PharmacySchedulePage />} />
+              <Route path="location" element={<PharmacyLocationPage />} />
+              <Route path="reports" element={<PharmacyReportsPage />} />
+              <Route path="messages" element={<PharmacyMessagesPage />} />
+              <Route path="notifications" element={<PharmacyNotificationsPage />} />
+              <Route path="settings" element={<PharmacySettingsPage />} />
+            </Routes>
+          </main>
+        </SidebarProvider>
+      </div>
+    </ProtectedRoute>
   );
 };
 

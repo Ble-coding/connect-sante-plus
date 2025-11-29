@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 const LoginForm = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [firstName, setFirstName] = React.useState('');
   const [rememberMe, setRememberMe] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
@@ -19,27 +20,85 @@ const LoginForm = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // In a real app, this would be an API call to authenticate the user
-    // For demo purposes, we'll simulate login based on email
+    // Simuler l'authentification
     setTimeout(() => {
+      // Déterminer le type d'utilisateur (insensible à la casse)
+      const emailLower = email.toLowerCase().trim();
+      let userType = 'patient';
+      let dashboardPath = '/dashboard';
+      
+      // Vérifier dans l'ordre de priorité (admin > doctor > pharmacy > patient)
+      if (emailLower.includes('admin')) {
+        userType = 'admin';
+        dashboardPath = '/admin-dashboard';
+      } else if (emailLower.includes('doctor') || emailLower.includes('dr') || emailLower.includes('medecin') || emailLower.includes('médecin')) {
+        userType = 'doctor';
+        dashboardPath = '/doctor-dashboard';
+      } else if (emailLower.includes('pharmacy') || emailLower.includes('pharmacie') || emailLower.includes('pharmacien')) {
+        userType = 'pharmacy';
+        dashboardPath = '/pharmacy-dashboard';
+      }
+      
+      // Debug: afficher dans la console pour vérifier
+      console.log('=== CONNEXION ===');
+      console.log('Email saisi:', email);
+      console.log('Email en minuscules:', emailLower);
+      console.log('UserType détecté:', userType);
+      console.log('Dashboard path:', dashboardPath);
+      console.log('================');
+      
+      // Extraire le prénom depuis l'email si pas fourni, ou utiliser le prénom saisi
+      let userName = firstName.trim();
+      if (!userName && email) {
+        // Essayer d'extraire un nom depuis l'email (avant le @)
+        const emailName = email.split('@')[0];
+        // Capitaliser la première lettre
+        userName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+      }
+      if (!userName) {
+        userName = 'Utilisateur'; // Nom par défaut
+      }
+      
+      // Créer la session utilisateur
+      const session = {
+        email,
+        firstName: userName,
+        userType,
+        loginTime: new Date().toISOString(),
+        rememberMe
+      };
+      
+      // Sauvegarder la session AVANT la navigation
+      localStorage.setItem('pharmaconnect_user_session', JSON.stringify(session));
+      
+      // Si "Se souvenir de moi", sauvegarder aussi l'email
+      if (rememberMe) {
+        localStorage.setItem('pharmaconnect_remembered_email', email);
+      } else {
+        localStorage.removeItem('pharmaconnect_remembered_email');
+      }
+      
       toast({
         title: "Connexion réussie",
-        description: "Vous êtes maintenant connecté à votre compte.",
+        description: `Vous êtes maintenant connecté en tant que ${userType}.`,
       });
+      
       setIsLoading(false);
       
-      // Route based on user type (demo logic)
-      if (email.includes('admin')) {
-        navigate('/admin-dashboard');
-      } else if (email.includes('doctor') || email.includes('dr')) {
-        navigate('/doctor-dashboard');
-      } else if (email.includes('pharmacy') || email.includes('pharmacie')) {
-        navigate('/pharmacy-dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+      // Utiliser window.location.href directement pour garantir la navigation
+      console.log('Redirection vers:', dashboardPath);
+      window.location.href = dashboardPath;
     }, 1500);
   };
+  
+  // Charger l'email sauvegardé si "Se souvenir de moi" était coché
+  React.useEffect(() => {
+    const rememberedEmail = localStorage.getItem('pharmaconnect_remembered_email');
+    if (rememberedEmail) {
+      setEmail(rememberedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   return (
     <div className="w-full max-w-md mx-auto p-6 space-y-6">
@@ -63,6 +122,20 @@ const LoginForm = () => {
           />
           <p className="text-xs text-muted-foreground">
             Demo: utilisez "admin@", "doctor@", "pharmacy@" ou "patient@" pour tester les différents tableaux de bord
+          </p>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="firstName">Prénom (optionnel)</Label>
+          <Input
+            id="firstName"
+            type="text"
+            placeholder="Votre prénom"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Si non renseigné, un nom sera généré depuis votre email
           </p>
         </div>
         

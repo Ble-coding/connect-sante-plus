@@ -12,6 +12,7 @@ import {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const logoPath = "/Tech Company Logo Emphasizing Health (5).png";
 
   return (
     <header className="sticky top-0 w-full bg-white/90 backdrop-blur-sm border-b z-50">
@@ -19,7 +20,7 @@ const Header = () => {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center">
             <img 
-              src="/lovable-uploads/a469a2ff-2942-41f7-ae90-c90117bc083b.png" 
+              src={logoPath} 
               alt="PharmaConnect" 
               className="h-12 w-auto"
             />

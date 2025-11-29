@@ -22,29 +22,38 @@ interface Insurance {
 }
 
 export function InsuranceManager() {
-  const [insurances, setInsurances] = useState<Insurance[]>([
-    {
-      id: '1',
-      name: 'Assurance Maladie',
-      type: 'primary',
-      provider: 'CPAM',
-      policyNumber: '1234567890123',
-      expiryDate: '2025-12-31',
-      coverage: 70,
-      status: 'active'
-    },
-    {
-      id: '2',
-      name: 'Mutuelle Santé',
-      type: 'secondary',
-      provider: 'Harmonie Mutuelle',
-      policyNumber: 'HM987654321',
-      groupNumber: 'GRP001',
-      expiryDate: '2024-12-31',
-      coverage: 30,
-      status: 'active'
+  // Charger les assurances depuis localStorage
+  const loadInsurances = (): Insurance[] => {
+    const saved = localStorage.getItem('pharmaconnect_insurances');
+    if (saved) {
+      return JSON.parse(saved);
     }
-  ]);
+    return [
+      {
+        id: '1',
+        name: 'Assurance Maladie',
+        type: 'primary',
+        provider: 'CPAM',
+        policyNumber: '1234567890123',
+        expiryDate: '2025-12-31',
+        coverage: 70,
+        status: 'active'
+      },
+      {
+        id: '2',
+        name: 'Mutuelle Santé',
+        type: 'secondary',
+        provider: 'Harmonie Mutuelle',
+        policyNumber: 'HM987654321',
+        groupNumber: 'GRP001',
+        expiryDate: '2024-12-31',
+        coverage: 30,
+        status: 'active'
+      }
+    ];
+  };
+
+  const [insurances, setInsurances] = useState<Insurance[]>(loadInsurances());
 
   const [isAdding, setIsAdding] = useState(false);
   const [newInsurance, setNewInsurance] = useState({
@@ -84,7 +93,10 @@ export function InsuranceManager() {
       status: 'pending'
     };
 
-    setInsurances(prev => [...prev, insurance]);
+    const updated = [...insurances, insurance];
+    setInsurances(updated);
+    localStorage.setItem('pharmaconnect_insurances', JSON.stringify(updated));
+    
     setNewInsurance({
       name: '',
       type: 'secondary',
