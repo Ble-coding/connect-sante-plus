@@ -63,16 +63,26 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Healthcare-specific colors
+				// Healthcare-specific colors - Palette personnalisée
 				pharma: {
-					primary: "#0E7490", // Teal
-					secondary: "#14B8A6", // Lighter teal
-					accent: "#7E22CE", // Purple for accent
-					patient: "#0369A1", // Blue for patient areas
-					doctor: "#15803D", // Green for doctor areas
-					pharmacy: "#B45309", // Amber for pharmacy areas
-					light: "#E0F2FE", // Light blue background
-					muted: "#94A3B8", // Muted text color
+					salem: "#0fa14d", // Vert vif principal (Salem)
+					"blue-zodiac": "#0e1f37", // Bleu foncé (Blue Zodiac)
+					genoa: "#15865e", // Vert moyen (Genoa)
+					eden: "#106155", // Vert foncé/teal (Eden)
+					"off-green": "#e6f9ee", // Vert très clair (Off Green)
+					"de-york": "#6fc298", // Vert clair (De York)
+					"shadow-green": "#93c4c4", // Teal clair (Shadow Green)
+					"shuttle-gray": "#596974", // Gris bleuté (Shuttle Gray)
+					// Mappings pour compatibilité
+					primary: "#0fa14d", // Salem - vert principal
+					secondary: "#15865e", // Genoa - vert secondaire
+					accent: "#93c4c4", // Shadow Green - teal clair
+					patient: "#0e1f37", // Blue Zodiac - bleu foncé
+					doctor: "#0fa14d", // Salem - vert vif
+					pharmacy: "#15865e", // Genoa - vert moyen
+					light: "#e6f9ee", // Off Green - vert très clair
+					muted: "#596974", // Shuttle Gray - gris bleuté
+					dark: "#0e1f37", // Blue Zodiac - bleu foncé
 				}
 			},
 			borderRadius: {
