@@ -13,11 +13,18 @@ import AboutPage from "./pages/AboutPage";
 import ForPatientsPage from "./pages/ForPatientsPage";
 import ForDoctorsPage from "./pages/ForDoctorsPage";
 import ForPharmaciesPage from "./pages/ForPharmaciesPage";
+import ForInsurancesPage from "./pages/ForInsurancesPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import DashboardPage from "./pages/DashboardPage";
 import DoctorDashboardPage from "./pages/DoctorDashboardPage";
 import PharmacyDashboardPage from "./pages/PharmacyDashboardPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import BlogPage from "./pages/BlogPage";
+import FAQPage from "./pages/FAQPage";
+import SupportPage from "./pages/SupportPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import CookiesPage from "./pages/CookiesPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +44,14 @@ const App = () => (
           <Route path="/for-patients" element={<ForPatientsPage />} />
           <Route path="/for-doctors" element={<ForDoctorsPage />} />
           <Route path="/for-pharmacies" element={<ForPharmaciesPage />} />
+          <Route path="/for-insurances" element={<ForInsurancesPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/cookies" element={<CookiesPage />} />
+          <Route path="/cookie-policy" element={<CookiesPage />} />
           <Route path="/dashboard/*" element={<DashboardPage />} />
           <Route path="/doctor-dashboard/*" element={<DoctorDashboardPage />} />
           <Route path="/pharmacy-dashboard/*" element={<PharmacyDashboardPage />} />
