@@ -20,8 +20,12 @@ import DoctorDashboardPage from "./pages/DoctorDashboardPage";
 import PharmacyDashboardPage from "./pages/PharmacyDashboardPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 import FAQPage from "./pages/FAQPage";
 import SupportPage from "./pages/SupportPage";
+import ContactPage from "./pages/ContactPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import CareersPage from "./pages/CareersPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
@@ -46,8 +50,12 @@ const App = () => (
           <Route path="/for-pharmacies" element={<ForPharmaciesPage />} />
           <Route path="/for-insurances" element={<ForInsurancesPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/support" element={<SupportPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/careers" element={<CareersPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/cookies" element={<CookiesPage />} />
