@@ -23,7 +23,7 @@ export function DashboardContent() {
 
   // Charger le nom de l'utilisateur depuis la session
   useEffect(() => {
-    const session = localStorage.getItem('pharmaconnect_user_session');
+    const session = localStorage.getItem('pharmafriconnect_user_session');
     if (session) {
       try {
         const sessionData = JSON.parse(session);

@@ -15,7 +15,7 @@ export function ProtectedRoute({ children, allowedUserTypes, redirectPath }: Pro
   useEffect(() => {
     // Attendre un peu pour s'assurer que localStorage est synchronisé
     const checkSession = () => {
-      const session = localStorage.getItem('pharmaconnect_user_session');
+      const session = localStorage.getItem('pharmafriconnect_user_session');
       
       if (!session) {
         // Pas de session, rediriger vers login

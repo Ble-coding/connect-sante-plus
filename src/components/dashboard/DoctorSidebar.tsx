@@ -89,7 +89,7 @@ export function DoctorSidebar() {
         <div className="flex items-center gap-3">
           <img 
             src="/Tech Company Logo Emphasizing Health (5).png" 
-            alt="PharmaConnect" 
+            alt="Pharma Africa Connect" 
             className="h-14 w-auto"
           />
           <div>

@@ -105,7 +105,7 @@ const ForDoctorsPage = () => {
               <div className="relative">
                 <img 
                   src="https://img.freepik.com/free-vector/online-doctor-concept-illustration_114360-1646.jpg" 
-                  alt="Médecin utilisant PharmaConnect" 
+                  alt="Médecin utilisant Pharma Africa Connect" 
                   className="rounded-lg w-full"
                 />
               </div>
@@ -144,7 +144,7 @@ const ForDoctorsPage = () => {
           <div className="container px-4 md:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl font-bold mb-6">Pourquoi choisir PharmaConnect ?</h2>
+                <h2 className="text-3xl font-bold mb-6">Pourquoi choisir Pharma Africa Connect ?</h2>
                 <div className="space-y-6">
                   {benefits.map((benefit, index) => (
                     <div key={index} className="flex items-start">
@@ -190,7 +190,7 @@ const ForDoctorsPage = () => {
             <div className="text-center max-w-3xl mx-auto">
               <Stethoscope className="h-16 w-16 mx-auto mb-6 text-white" />
               <h2 className="text-3xl font-bold mb-6">
-                Rejoignez le réseau de médecins PharmaConnect
+                Rejoignez le réseau de médecins Pharma Africa Connect
               </h2>
               <p className="text-xl mb-8 opacity-90">
                 Participez à la révolution de la santé numérique en Afrique de l'Ouest.

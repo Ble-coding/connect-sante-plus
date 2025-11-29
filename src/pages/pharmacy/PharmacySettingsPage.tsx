@@ -287,7 +287,7 @@ const PharmacySettingsPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-gray-600">Version</p>
-              <p className="font-medium">PharmaConnect v2.1.4</p>
+              <p className="font-medium">Pharma Africa Connect v2.1.4</p>
             </div>
             <div>
               <p className="text-gray-600">Dernière mise à jour</p>

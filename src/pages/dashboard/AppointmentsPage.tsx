@@ -29,7 +29,7 @@ export function AppointmentsPage() {
 
   // Charger les rendez-vous depuis localStorage
   const loadAppointments = () => {
-    const saved = localStorage.getItem('pharmaconnect_appointments');
+    const saved = localStorage.getItem('pharmafriconnect_appointments');
     if (saved) {
       return JSON.parse(saved);
     }
@@ -143,7 +143,7 @@ export function AppointmentsPage() {
   const handleDelete = (id: number) => {
     const updated = allAppointments.filter(apt => apt.id !== id);
     setAllAppointments(updated);
-    localStorage.setItem('pharmaconnect_appointments', JSON.stringify(updated));
+    localStorage.setItem('pharmafriconnect_appointments', JSON.stringify(updated));
     toast({
       title: "Rendez-vous supprimé",
       description: "Le rendez-vous a été supprimé avec succès.",

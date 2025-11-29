@@ -24,7 +24,7 @@ interface Insurance {
 export function InsuranceManager() {
   // Charger les assurances depuis localStorage
   const loadInsurances = (): Insurance[] => {
-    const saved = localStorage.getItem('pharmaconnect_insurances');
+    const saved = localStorage.getItem('pharmafriconnect_insurances');
     if (saved) {
       return JSON.parse(saved);
     }
@@ -95,7 +95,7 @@ export function InsuranceManager() {
 
     const updated = [...insurances, insurance];
     setInsurances(updated);
-    localStorage.setItem('pharmaconnect_insurances', JSON.stringify(updated));
+    localStorage.setItem('pharmafriconnect_insurances', JSON.stringify(updated));
     
     setNewInsurance({
       name: '',

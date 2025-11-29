@@ -8,14 +8,14 @@ const AboutHero = () => {
         <div className="flex flex-col items-center text-center">
           <img 
             src="/Tech Company Logo Emphasizing Health (5).png" 
-            alt="PharmaConnect Logo" 
+            alt="Pharma Africa Connect Logo" 
             className="h-32 md:h-40 mb-8" 
           />
           <h1 className="text-3xl md:text-5xl font-bold mb-6">
-            À propos de PharmaConnect
+            À propos de Pharma Africa Connect
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            PharmaConnect révolutionne l'accès aux soins de santé en connectant patients, professionnels de santé et pharmacies sur une plateforme unique et intuitive.
+            Pharma Africa Connect révolutionne l'accès aux soins de santé en connectant patients, professionnels de santé et pharmacies sur une plateforme unique et intuitive.
           </p>
         </div>
       </div>

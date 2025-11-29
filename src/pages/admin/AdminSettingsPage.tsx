@@ -31,11 +31,11 @@ export function AdminSettingsPage() {
           <CardContent className="space-y-4">
             <div className="grid w-full max-w-sm items-center gap-1.5">
               <Label htmlFor="site-name">Nom de la plateforme</Label>
-              <Input type="text" id="site-name" defaultValue="PharmaConnect" />
+              <Input type="text" id="site-name" defaultValue="Pharma Africa Connect" />
             </div>
             <div className="grid w-full max-w-sm items-center gap-1.5">
               <Label htmlFor="admin-email">Email administrateur</Label>
-              <Input type="email" id="admin-email" defaultValue="admin@pharmaconnect.com" />
+              <Input type="email" id="admin-email" defaultValue="admin@pharmafriconnect.com" />
             </div>
             <div className="flex items-center space-x-2">
               <Switch id="maintenance-mode" />

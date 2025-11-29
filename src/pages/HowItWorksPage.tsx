@@ -104,7 +104,7 @@ const HowItWorksPage = () => {
                 Une solution simple pour vos besoins de santé
               </h1>
               <p className="text-xl text-gray-600 mb-8">
-                Découvrez comment PharmaConnect révolutionne l'accès aux soins de santé 
+                Découvrez comment Pharma Africa Connect révolutionne l'accès aux soins de santé 
                 en seulement 4 étapes simples.
               </p>
               <Link to="/register">
@@ -160,7 +160,7 @@ const HowItWorksPage = () => {
         <section className="py-20 bg-gray-50">
           <div className="container px-4 md:px-6">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <h2 className="text-3xl font-bold mb-6">Pourquoi choisir PharmaConnect ?</h2>
+              <h2 className="text-3xl font-bold mb-6">Pourquoi choisir Pharma Africa Connect ?</h2>
               <p className="text-xl text-gray-600">
                 Des fonctionnalités avancées au service de votre santé
               </p>
@@ -283,7 +283,7 @@ const HowItWorksPage = () => {
                 Prêt à simplifier vos soins de santé ?
               </h2>
               <p className="text-xl mb-8 opacity-90">
-                Rejoignez des milliers d'utilisateurs qui font déjà confiance à PharmaConnect
+                Rejoignez des milliers d'utilisateurs qui font déjà confiance à Pharma Africa Connect
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link to="/register">

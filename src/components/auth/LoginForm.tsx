@@ -69,13 +69,13 @@ const LoginForm = () => {
       };
       
       // Sauvegarder la session AVANT la navigation
-      localStorage.setItem('pharmaconnect_user_session', JSON.stringify(session));
+      localStorage.setItem('pharmafriconnect_user_session', JSON.stringify(session));
       
       // Si "Se souvenir de moi", sauvegarder aussi l'email
       if (rememberMe) {
-        localStorage.setItem('pharmaconnect_remembered_email', email);
+        localStorage.setItem('pharmafriconnect_remembered_email', email);
       } else {
-        localStorage.removeItem('pharmaconnect_remembered_email');
+        localStorage.removeItem('pharmafriconnect_remembered_email');
       }
       
       toast({
@@ -93,7 +93,7 @@ const LoginForm = () => {
   
   // Charger l'email sauvegardé si "Se souvenir de moi" était coché
   React.useEffect(() => {
-    const rememberedEmail = localStorage.getItem('pharmaconnect_remembered_email');
+    const rememberedEmail = localStorage.getItem('pharmafriconnect_remembered_email');
     if (rememberedEmail) {
       setEmail(rememberedEmail);
       setRememberMe(true);
@@ -105,7 +105,7 @@ const LoginForm = () => {
       <div className="text-center">
         <h1 className="text-2xl font-bold">Connexion</h1>
         <p className="text-muted-foreground mt-2">
-          Connectez-vous à votre compte PharmaConnect
+          Connectez-vous à votre compte Pharma Africa Connect
         </p>
       </div>
       

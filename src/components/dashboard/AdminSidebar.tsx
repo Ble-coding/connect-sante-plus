@@ -102,7 +102,7 @@ export function AdminSidebar() {
         <div className="flex items-center gap-2">
           <img 
             src="/Tech Company Logo Emphasizing Health (5).png" 
-            alt="PharmaConnect" 
+            alt="Pharma Africa Connect" 
             className="h-14 w-auto"
           />
           <div>

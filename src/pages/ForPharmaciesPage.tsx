@@ -109,7 +109,7 @@ const ForPharmaciesPage = () => {
               <div className="relative">
                 <img 
                   src="https://img.freepik.com/free-vector/pharmacy-concept-illustration_114360-8292.jpg" 
-                  alt="Pharmacie moderne avec PharmaConnect" 
+                  alt="Pharmacie moderne avec Pharma Africa Connect" 
                   className="rounded-lg w-full"
                 />
               </div>
@@ -149,7 +149,7 @@ const ForPharmaciesPage = () => {
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl font-bold mb-6">Les avantages pour votre officine</h2>
               <p className="text-xl text-gray-600">
-                Découvrez comment PharmaConnect peut transformer votre activité pharmaceutique.
+                Découvrez comment Pharma Africa Connect peut transformer votre activité pharmaceutique.
               </p>
             </div>
             
@@ -179,7 +179,7 @@ const ForPharmaciesPage = () => {
                 <h2 className="text-3xl font-bold mb-6">Des résultats concrets</h2>
                 <p className="text-xl text-gray-600 mb-8">
                   Les pharmacies partenaires constatent rapidement l'impact positif 
-                  de PharmaConnect sur leur activité.
+                  de Pharma Africa Connect sur leur activité.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center">
@@ -224,7 +224,7 @@ const ForPharmaciesPage = () => {
             <div className="text-center max-w-3xl mx-auto">
               <Store className="h-16 w-16 mx-auto mb-6 text-white" />
               <h2 className="text-3xl font-bold mb-6">
-                Faites partie du réseau PharmaConnect
+                Faites partie du réseau Pharma Africa Connect
               </h2>
               <p className="text-xl mb-8 opacity-90">
                 Rejoignez dès aujourd'hui les pharmacies qui transforment l'accès aux médicaments en Afrique de l'Ouest.

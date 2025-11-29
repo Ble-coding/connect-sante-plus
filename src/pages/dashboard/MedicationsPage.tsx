@@ -38,7 +38,7 @@ export function MedicationsPage() {
 
   // Charger les médicaments depuis localStorage
   const loadMedications = (): Medication[] => {
-    const saved = localStorage.getItem('pharmaconnect_medications');
+    const saved = localStorage.getItem('pharmafriconnect_medications');
     if (saved) {
       return JSON.parse(saved);
     }
@@ -90,7 +90,7 @@ export function MedicationsPage() {
 
   // Charger le planning du jour depuis localStorage
   const loadTodaySchedule = (): ScheduleDose[] => {
-    const saved = localStorage.getItem('pharmaconnect_schedule_' + new Date().toDateString());
+    const saved = localStorage.getItem('pharmafriconnect_schedule_' + new Date().toDateString());
     if (saved) {
       return JSON.parse(saved);
     }
@@ -170,7 +170,7 @@ export function MedicationsPage() {
       return med;
     });
     setCurrentMedications(updated);
-    localStorage.setItem('pharmaconnect_medications', JSON.stringify(updated));
+    localStorage.setItem('pharmafriconnect_medications', JSON.stringify(updated));
   };
 
   const handleMarkAsTaken = (scheduleId: number) => {
@@ -181,7 +181,7 @@ export function MedicationsPage() {
       return dose;
     });
     setTodaySchedule(updated);
-    localStorage.setItem('pharmaconnect_schedule_' + new Date().toDateString(), JSON.stringify(updated));
+    localStorage.setItem('pharmafriconnect_schedule_' + new Date().toDateString(), JSON.stringify(updated));
     
     // Mettre à jour le médicament correspondant
     const dose = todaySchedule.find(d => d.id === scheduleId);
@@ -201,7 +201,7 @@ export function MedicationsPage() {
         return med;
       });
       setCurrentMedications(updatedMeds);
-      localStorage.setItem('pharmaconnect_medications', JSON.stringify(updatedMeds));
+      localStorage.setItem('pharmafriconnect_medications', JSON.stringify(updatedMeds));
     }
   };
 

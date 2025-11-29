@@ -81,7 +81,7 @@ export function AppointmentModal({ trigger, appointment, onSave }: AppointmentMo
     };
 
     // Charger les rendez-vous existants
-    const saved = localStorage.getItem('pharmaconnect_appointments');
+    const saved = localStorage.getItem('pharmafriconnect_appointments');
     let appointments = saved ? JSON.parse(saved) : [];
     
     if (appointment) {
@@ -94,7 +94,7 @@ export function AppointmentModal({ trigger, appointment, onSave }: AppointmentMo
       appointments.push(newAppointment);
     }
     
-    localStorage.setItem('pharmaconnect_appointments', JSON.stringify(appointments));
+    localStorage.setItem('pharmafriconnect_appointments', JSON.stringify(appointments));
     
     // Déclencher un événement personnalisé pour notifier les autres composants
     window.dispatchEvent(new Event('appointments-updated'));

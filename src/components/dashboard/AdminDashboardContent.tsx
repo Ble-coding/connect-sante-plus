@@ -54,7 +54,7 @@ export function AdminDashboardContent() {
       <div>
         <h1 className="text-3xl font-bold">Tableau de bord administrateur</h1>
         <p className="text-muted-foreground">
-          Vue d'ensemble de la plateforme PharmaConnect
+          Vue d'ensemble de la plateforme Pharma Africa Connect
         </p>
       </div>
 

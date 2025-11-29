@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="container py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-bold mb-4">PharmaConnect</h3>
+            <h3 className="text-lg font-bold mb-4">Pharma Africa Connect</h3>
             <p className="text-sm text-gray-600 mb-4">
               Une solution digitale visant à améliorer l'accès aux soins et aux médicaments.
             </p>
@@ -105,7 +105,7 @@ const Footer = () => {
 
         <div className="mt-8 pt-8 border-t border-gray-200">
           <p className="text-sm text-gray-500 text-center">
-            &copy; {new Date().getFullYear()} PharmaConnect. Tous droits réservés.
+            &copy; {new Date().getFullYear()} Pharma Africa Connect. Tous droits réservés.
           </p>
         </div>
       </div>

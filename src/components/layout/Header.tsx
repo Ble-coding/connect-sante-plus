@@ -21,7 +21,7 @@ const Header = () => {
           <Link to="/" className="flex items-center">
             <img 
               src={logoPath} 
-              alt="PharmaConnect" 
+              alt="Pharma Africa Connect" 
               className="h-12 w-auto"
             />
           </Link>

@@ -34,7 +34,7 @@ export function MessagesPage() {
 
   // Charger les conversations depuis localStorage ou utiliser les données par défaut
   const loadConversations = (): Conversation[] => {
-    const saved = localStorage.getItem('pharmaconnect_conversations');
+    const saved = localStorage.getItem('pharmafriconnect_conversations');
     if (saved) {
       return JSON.parse(saved);
     }
@@ -80,7 +80,7 @@ export function MessagesPage() {
 
   // Charger les messages depuis localStorage ou utiliser les données par défaut
   const loadMessages = (conversationId: number): Message[] => {
-    const saved = localStorage.getItem(`pharmaconnect_messages_${conversationId}`);
+    const saved = localStorage.getItem(`pharmafriconnect_messages_${conversationId}`);
     if (saved) {
       return JSON.parse(saved);
     }
@@ -162,7 +162,7 @@ export function MessagesPage() {
       setMessages(updatedMessages);
       
       // Sauvegarder dans localStorage
-      localStorage.setItem(`pharmaconnect_messages_${selectedConversation}`, JSON.stringify(updatedMessages));
+      localStorage.setItem(`pharmafriconnect_messages_${selectedConversation}`, JSON.stringify(updatedMessages));
       
       // Mettre à jour la dernière conversation
       const updatedConversations = conversations.map(conv => {
@@ -176,7 +176,7 @@ export function MessagesPage() {
         return conv;
       });
       setConversations(updatedConversations);
-      localStorage.setItem('pharmaconnect_conversations', JSON.stringify(updatedConversations));
+      localStorage.setItem('pharmafriconnect_conversations', JSON.stringify(updatedConversations));
       
       setNewMessage('');
     }

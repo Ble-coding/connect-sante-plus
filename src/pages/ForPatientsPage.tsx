@@ -110,7 +110,7 @@ const ForPatientsPage = () => {
               <div className="relative">
                 <img 
                   src="https://img.freepik.com/free-vector/patient-using-smartphone-telemedicine-online-doctor-consultation_74855-14247.jpg" 
-                  alt="Patient utilisant PharmaConnect" 
+                  alt="Patient utilisant Pharma Africa Connect" 
                   className="rounded-lg w-full"
                 />
               </div>
@@ -124,7 +124,7 @@ const ForPatientsPage = () => {
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl font-bold mb-6">Des fonctionnalités pensées pour vous</h2>
               <p className="text-xl text-gray-600">
-                PharmaConnect met à votre disposition tous les outils nécessaires pour gérer votre santé efficacement.
+                Pharma Africa Connect met à votre disposition tous les outils nécessaires pour gérer votre santé efficacement.
               </p>
             </div>
             
