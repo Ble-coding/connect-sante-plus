@@ -14,16 +14,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 142 83% 35%; /* Salem - Vert vif principal #0fa14d */
+    --primary: 215 58% 13%; /* Blue Zodiac - Bleu foncé principal #0e1f37 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 158 75% 30%; /* Genoa - Vert moyen #15865e */
+    --secondary: 150 60% 38%; /* Eucalyptus - Vert moyen #269d64 */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 207 12% 40%; /* Shuttle Gray - Gris bleuté #596974 */
+    --muted: 207 12% 40%; /* Gris neutre #64748B */
     --muted-foreground: 207 12% 60%;
 
-    --accent: 180 32% 63%; /* Shadow Green - Teal clair #93c4c4 */
+    --accent: 150 60% 38%; /* Eucalyptus - Vert moyen #269d64 */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -31,7 +31,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 142 83% 35%; /* Salem - Vert vif principal */
+    --ring: 215 58% 13%; /* Blue Zodiac - Bleu foncé principal */
 
     --radius: 0.5rem;
 
@@ -55,16 +55,16 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 142 83% 35%; /* Salem - Vert vif principal */
+    --primary: 215 58% 13%; /* Blue Zodiac - Bleu foncé principal */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 158 75% 30%; /* Genoa - Vert moyen */
+    --secondary: 150 60% 38%; /* Eucalyptus - Vert moyen */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 207 12% 40%; /* Shuttle Gray - Gris bleuté */
+    --muted: 207 12% 40%; /* Gris neutre */
     --muted-foreground: 207 12% 60%;
 
-    --accent: 180 32% 63%; /* Shadow Green - Teal clair */
+    --accent: 150 60% 38%; /* Eucalyptus - Vert moyen */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
@@ -72,7 +72,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 142 83% 35%; /* Salem - Vert vif principal */
+    --ring: 215 58% 13%; /* Blue Zodiac - Bleu foncé principal */
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -98,7 +98,7 @@
 
 @layer components {
   .hero-section {
-    background-image: linear-gradient(to bottom, rgba(15, 161, 77, 0.05), rgba(15, 161, 77, 0.1));
+    background-image: linear-gradient(to bottom, rgba(14, 31, 55, 0.05), rgba(14, 31, 55, 0.1));
   }
   
   .feature-card {

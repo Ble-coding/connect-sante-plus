@@ -68,9 +68,9 @@ const CtaSection = () => {
             <div className="border-t border-gray-200 pt-6 mt-6">
               <p className="font-medium mb-4 text-gray-900">Besoin d'aide ou d'informations ?</p>
               <div className="flex flex-col gap-3">
-                <a href="mailto:contact@pharmaconnect.ci" className="flex items-center text-sm text-gray-600 hover:text-pharma-primary transition-colors">
+                <a href="mailto:Info@pharmafriconnect.africa" className="flex items-center text-sm text-gray-600 hover:text-pharma-primary transition-colors">
                   <Mail className="h-4 w-4 mr-2" />
-                  contact@pharmaconnect.ci
+                  Info@pharmafriconnect.africa
                 </a>
                 <a href="tel:+22512345678" className="flex items-center text-sm text-gray-600 hover:text-pharma-primary transition-colors">
                   <Phone className="h-4 w-4 mr-2" />

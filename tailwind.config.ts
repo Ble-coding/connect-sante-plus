@@ -63,25 +63,20 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Healthcare-specific colors - Palette personnalisée
+				// Healthcare-specific colors - Palette simplifiée
 				pharma: {
-					salem: "#0fa14d", // Vert vif principal (Salem)
-					"blue-zodiac": "#0e1f37", // Bleu foncé (Blue Zodiac)
-					genoa: "#15865e", // Vert moyen (Genoa)
-					eden: "#106155", // Vert foncé/teal (Eden)
-					"off-green": "#e6f9ee", // Vert très clair (Off Green)
-					"de-york": "#6fc298", // Vert clair (De York)
-					"shadow-green": "#93c4c4", // Teal clair (Shadow Green)
-					"shuttle-gray": "#596974", // Gris bleuté (Shuttle Gray)
+					"blue-zodiac": "#0e1f37", // Bleu foncé (Blue Zodiac) - PRIMARY
+					eucalyptus: "#269d64", // Vert moyen (Eucalyptus)
+					"green-haze": "#00ae4a", // Vert vif (Green Haze)
 					// Mappings pour compatibilité
-					primary: "#0fa14d", // Salem - vert principal
-					secondary: "#15865e", // Genoa - vert secondaire
-					accent: "#93c4c4", // Shadow Green - teal clair
+					primary: "#0e1f37", // Blue Zodiac - bleu foncé principal
+					secondary: "#269d64", // Eucalyptus - vert moyen
+					accent: "#269d64", // Eucalyptus - accent
 					patient: "#0e1f37", // Blue Zodiac - bleu foncé
-					doctor: "#0fa14d", // Salem - vert vif
-					pharmacy: "#15865e", // Genoa - vert moyen
-					light: "#e6f9ee", // Off Green - vert très clair
-					muted: "#596974", // Shuttle Gray - gris bleuté
+					doctor: "#00ae4a", // Green Haze - vert vif
+					pharmacy: "#269d64", // Eucalyptus - vert moyen
+					light: "#e6f9f0", // Variante claire du vert
+					muted: "#64748B", // Gris neutre pour texte secondaire
 					dark: "#0e1f37", // Blue Zodiac - bleu foncé
 				}
 			},
