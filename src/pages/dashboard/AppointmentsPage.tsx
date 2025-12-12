@@ -1,7 +1,7 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Video, MapPin, Plus, Filter, Search, Edit } from 'lucide-react';
@@ -9,87 +9,41 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AppointmentModal } from '@/components/appointments/AppointmentModal';
 import { useToast } from '@/components/ui/use-toast';
+import { useQuery } from '@tanstack/react-query';
+import { appointmentService } from '@/lib/api/services';
 
 interface Appointment {
   id: number;
-  doctor: string;
-  specialty: string;
+  doctor: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    doctor_profile?: {
+      specialization: string;
+    };
+  };
   date: string;
-  time: string;
-  type: string;
-  location: string;
+  duration: number;
+  reason: string;
   status: string;
+  consultation?: {
+    consultation_type: string;
+  };
 }
 
 export function AppointmentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  // Charger les rendez-vous depuis localStorage
-  const loadAppointments = () => {
-    const saved = localStorage.getItem('pharmafriconnect_appointments');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return [
-      {
-        id: 1,
-        doctor: "Dr. Marie Diallo",
-        specialty: "Médecin généraliste",
-        date: "2024-06-15",
-        time: "14:30",
-        type: "Consultation",
-        location: "Cabinet médical - 123 Rue de la Santé",
-        status: "confirmé"
-      },
-      {
-        id: 2,
-        doctor: "Dr. Ahmed Kone",
-        specialty: "Cardiologue",
-        date: "2024-06-20",
-        time: "10:00",
-        type: "Téléconsultation",
-        location: "En ligne",
-        status: "confirmé"
-      },
-      {
-        id: 3,
-        doctor: "Dr. Sophie Martin",
-        specialty: "Dermatologue",
-        date: "2024-06-25",
-        time: "16:00",
-        type: "Consultation",
-        location: "Clinique dermatologique",
-        status: "en_attente"
-      },
-      {
-        id: 4,
-        doctor: "Dr. Marie Diallo",
-        specialty: "Médecin généraliste",
-        date: "2024-06-10",
-        time: "14:30",
-        type: "Consultation",
-        location: "Cabinet médical",
-        status: "terminé"
-      },
-      {
-        id: 5,
-        doctor: "Dr. Paul Dubois",
-        specialty: "Ophtalmologue",
-        date: "2024-06-05",
-        time: "09:15",
-        type: "Consultation",
-        location: "Centre ophtalmologique",
-        status: "terminé"
-      }
-    ];
-  };
+  // Charger les rendez-vous depuis l'API
+  const { data: appointmentsData, isLoading, refetch } = useQuery({
+    queryKey: ['appointments'],
+    queryFn: () => appointmentService.getAll(),
+  });
 
-  const [allAppointments, setAllAppointments] = useState<Appointment[]>(loadAppointments());
+  const allAppointments: Appointment[] = appointmentsData?.data?.results || appointmentsData?.data || [];
 
-  // Séparer les rendez-vous à venir et passés (recalculé à chaque changement)
+  // Séparer les rendez-vous à venir et passés
   const { upcomingAppointments, pastAppointments } = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -97,84 +51,106 @@ export function AppointmentsPage() {
     const upcoming = allAppointments.filter(apt => {
       const aptDate = new Date(apt.date);
       aptDate.setHours(0, 0, 0, 0);
-      return apt.status !== 'terminé' && aptDate >= today;
+      return apt.status !== 'completed' && apt.status !== 'cancelled' && aptDate >= today;
     });
 
     const past = allAppointments.filter(apt => {
       const aptDate = new Date(apt.date);
       aptDate.setHours(0, 0, 0, 0);
-      return apt.status === 'terminé' || aptDate < today;
+      return apt.status === 'completed' || apt.status === 'cancelled' || aptDate < today;
     });
 
     return { upcomingAppointments: upcoming, pastAppointments: past };
   }, [allAppointments]);
 
-  const handleSaveAppointment = (appointment: Appointment) => {
-    // Recharger les rendez-vous depuis localStorage
-    const updated = loadAppointments();
-    setAllAppointments(updated);
-    setIsModalOpen(false);
-    setSelectedAppointment(null);
-  };
-  
-  // Recharger les rendez-vous quand le composant se monte ou quand localStorage change
-  useEffect(() => {
-    const handleAppointmentsUpdate = () => {
-      setAllAppointments(loadAppointments());
-    };
-    
-    // Écouter l'événement personnalisé
-    window.addEventListener('appointments-updated', handleAppointmentsUpdate);
-    
-    // Écouter les changements dans localStorage (pour les autres onglets)
-    window.addEventListener('storage', handleAppointmentsUpdate);
-    
-    return () => {
-      window.removeEventListener('appointments-updated', handleAppointmentsUpdate);
-      window.removeEventListener('storage', handleAppointmentsUpdate);
-    };
-  }, []);
-
-  const handleEdit = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setIsModalOpen(true);
+  const handleSaveAppointment = () => {
+    refetch();
   };
 
-  const handleDelete = (id: number) => {
-    const updated = allAppointments.filter(apt => apt.id !== id);
-    setAllAppointments(updated);
-    localStorage.setItem('pharmafriconnect_appointments', JSON.stringify(updated));
-    toast({
-      title: "Rendez-vous supprimé",
-      description: "Le rendez-vous a été supprimé avec succès.",
-    });
+  const handleCancel = async (id: number) => {
+    try {
+      await appointmentService.cancel(id);
+      toast({
+        title: "Rendez-vous annulé",
+        description: "Le rendez-vous a été annulé avec succès.",
+      });
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'annuler le rendez-vous.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmé': return 'bg-green-100 text-green-800';
-      case 'en_attente': return 'bg-yellow-100 text-yellow-800';
-      case 'terminé': return 'bg-gray-100 text-gray-800';
+      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'completed': return 'bg-gray-100 text-gray-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    return type === 'Téléconsultation' ? Video : MapPin;
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'confirmed': return 'Confirmé';
+      case 'pending': return 'En attente';
+      case 'completed': return 'Terminé';
+      case 'cancelled': return 'Annulé';
+      default: return status;
+    }
+  };
+
+  const getTypeIcon = (appointment: Appointment) => {
+    return appointment.consultation?.consultation_type === 'teleconsultation' ? Video : MapPin;
+  };
+
+  const formatDoctorName = (doctor: any) => {
+    if (!doctor) return 'Médecin';
+    return `Dr. ${doctor.first_name} ${doctor.last_name}`;
+  };
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      date: date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      time: date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    };
   };
 
   // Filtrer les rendez-vous selon la recherche
-  const filteredUpcoming = upcomingAppointments.filter(apt =>
-    apt.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    apt.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    apt.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUpcoming = upcomingAppointments.filter(apt => {
+    const doctorName = formatDoctorName(apt.doctor);
+    const specialty = apt.doctor?.doctor_profile?.specialization || '';
+    return (
+      doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      apt.reason.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
-  const filteredPast = pastAppointments.filter(apt =>
-    apt.doctor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    apt.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    apt.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPast = pastAppointments.filter(apt => {
+    const doctorName = formatDoctorName(apt.doctor);
+    const specialty = apt.doctor?.doctor_profile?.specialization || '';
+    return (
+      doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      apt.reason.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  if (isLoading) {
+    return (
+      <SidebarInset>
+        <div className="flex items-center justify-center h-full">
+          <p>Chargement des rendez-vous...</p>
+        </div>
+      </SidebarInset>
+    );
+  }
 
   return (
     <SidebarInset>
@@ -219,123 +195,132 @@ export function AppointmentsPage() {
           </TabsList>
 
           <TabsContent value="upcoming" className="space-y-4">
-            {filteredUpcoming.map((appointment) => {
-              const TypeIcon = getTypeIcon(appointment.type);
-              return (
-                <Card key={appointment.id}>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{appointment.doctor}</h3>
-                          <Badge className={getStatusColor(appointment.status)}>
-                            {appointment.status}
-                          </Badge>
+            {filteredUpcoming.length === 0 ? (
+              <Card>
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  Aucun rendez-vous à venir
+                </CardContent>
+              </Card>
+            ) : (
+              filteredUpcoming.map((appointment) => {
+                const TypeIcon = getTypeIcon(appointment);
+                const { date, time } = formatDateTime(appointment.date);
+                const doctorName = formatDoctorName(appointment.doctor);
+                const specialty = appointment.doctor?.doctor_profile?.specialization || '';
+                const isTeleconsultation = appointment.consultation?.consultation_type === 'teleconsultation';
+                
+                return (
+                  <Card key={appointment.id}>
+                    <CardContent className="p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{doctorName}</h3>
+                            <Badge className={getStatusColor(appointment.status)}>
+                              {getStatusLabel(appointment.status)}
+                            </Badge>
+                          </div>
+                          {specialty && <p className="text-sm text-muted-foreground">{specialty}</p>}
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {date}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {time}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <TypeIcon className="h-4 w-4" />
+                              {isTeleconsultation ? 'Téléconsultation' : 'Consultation'}
+                            </div>
+                          </div>
+                          {appointment.reason && (
+                            <p className="text-sm text-muted-foreground">Raison: {appointment.reason}</p>
+                          )}
                         </div>
-                        <p className="text-sm text-muted-foreground">{appointment.specialty}</p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(appointment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {appointment.time}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <TypeIcon className="h-4 w-4" />
-                            {appointment.location}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <AppointmentModal
-                          trigger={
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-4 w-4 mr-1" />
-                              Modifier
+                        <div className="flex gap-2">
+                          <AppointmentModal
+                            trigger={
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4 mr-1" />
+                                Modifier
+                              </Button>
+                            }
+                            appointment={appointment}
+                            onSave={handleSaveAppointment}
+                          />
+                          {appointment.status === 'pending' && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleCancel(appointment.id)}
+                            >
+                              Annuler
                             </Button>
-                          }
-                          appointment={appointment}
-                          onSave={handleSaveAppointment}
-                        />
-                        <Button size="sm" onClick={() => {
-                          if (appointment.type === 'Téléconsultation') {
-                            toast({
-                              title: "Téléconsultation",
-                              description: "Fonctionnalité de téléconsultation en développement",
-                            });
-                          } else {
-                            toast({
-                              title: "Détails",
-                              description: `Rendez-vous avec ${appointment.doctor} le ${new Date(appointment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} à ${appointment.time}`,
-                            });
-                          }
-                        }}>
-                          {appointment.type === 'Téléconsultation' ? 'Rejoindre' : 'Détails'}
-                        </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </TabsContent>
 
           <TabsContent value="past" className="space-y-4">
-            {filteredPast.map((appointment) => {
-              const TypeIcon = getTypeIcon(appointment.type);
-              return (
-                <Card key={appointment.id}>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{appointment.doctor}</h3>
-                          <Badge className={getStatusColor(appointment.status)}>
-                            {appointment.status}
-                          </Badge>
+            {filteredPast.length === 0 ? (
+              <Card>
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  Aucun rendez-vous passé
+                </CardContent>
+              </Card>
+            ) : (
+              filteredPast.map((appointment) => {
+                const TypeIcon = getTypeIcon(appointment);
+                const { date, time } = formatDateTime(appointment.date);
+                const doctorName = formatDoctorName(appointment.doctor);
+                const specialty = appointment.doctor?.doctor_profile?.specialization || '';
+                
+                return (
+                  <Card key={appointment.id}>
+                    <CardContent className="p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{doctorName}</h3>
+                            <Badge className={getStatusColor(appointment.status)}>
+                              {getStatusLabel(appointment.status)}
+                            </Badge>
+                          </div>
+                          {specialty && <p className="text-sm text-muted-foreground">{specialty}</p>}
+                          <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {date}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {time}
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">{appointment.specialty}</p>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(appointment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {appointment.time}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <TypeIcon className="h-4 w-4" />
-                            {appointment.location}
-                          </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => {
+                            toast({
+                              title: "Détails",
+                              description: `Rendez-vous avec ${doctorName} le ${date} à ${time}`,
+                            });
+                          }}>
+                            Voir détails
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => {
-                          toast({
-                            title: "Détails",
-                            description: `Rendez-vous avec ${appointment.doctor} le ${appointment.date} à ${appointment.time}`,
-                          });
-                        }}>
-                          Voir détails
-                        </Button>
-                        <AppointmentModal
-                          trigger={
-                            <Button variant="outline" size="sm">
-                              Reprendre RDV
-                            </Button>
-                          }
-                          appointment={{...appointment, status: 'en_attente'}}
-                          onSave={handleSaveAppointment}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </TabsContent>
         </Tabs>
       </div>

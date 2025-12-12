@@ -10,59 +10,67 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Search, MapPin } from 'lucide-react';
-
-// Mock data for pharmacies
-const mockPharmacies = [
-  {
-    id: 1,
-    name: "Pharmacie Centrale",
-    address: "15 Avenue de la République, Paris",
-    phone: "+33 1 23 45 67 89",
-    openingHours: "8h - 20h",
-    distance: "0.5 km",
-    medicationAvailable: true
-  },
-  {
-    id: 2,
-    name: "Pharmacie du Marché",
-    address: "8 Place du Marché, Paris",
-    phone: "+33 1 98 76 54 32",
-    openingHours: "9h - 19h",
-    distance: "1.2 km",
-    medicationAvailable: false
-  },
-  {
-    id: 3,
-    name: "Grande Pharmacie",
-    address: "45 Boulevard Haussmann, Paris",
-    phone: "+33 1 45 67 89 01",
-    openingHours: "8h - 22h",
-    distance: "2.3 km",
-    medicationAvailable: true
-  },
-];
+import { Search, MapPin, Phone, Navigation } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { pharmacyService } from '@/lib/api/services';
+import { useToast } from '@/components/ui/use-toast';
 
 const PharmacySearch = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [medicationName, setMedicationName] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  const { toast } = useToast();
+
+  const { data: searchResults, isLoading, refetch } = useQuery({
+    queryKey: ['pharmacies', 'search', location, medicationName],
+    queryFn: () => pharmacyService.search({
+      city: location || undefined,
+      medication: medicationName || undefined,
+    }),
+    enabled: false, // Ne pas exécuter automatiquement
+  });
+
+  const pharmacies = searchResults?.data?.results || searchResults?.data || [];
 
   const handleSearch = () => {
-    // In a real app, this would call an API with the search parameters
-    // For now, we'll just use our mock data
-    setSearchResults(mockPharmacies);
+    if (!location && !medicationName) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez saisir une localisation ou un médicament.",
+        variant: "destructive",
+      });
+      return;
+    }
     setSearchPerformed(true);
+    refetch();
   };
 
   const handleUseMyLocation = () => {
-    // In a real app, this would use the Geolocation API
-    setLocation("Localisation actuelle");
-    // For demo purposes, simulate search results
-    setSearchResults(mockPharmacies);
-    setSearchPerformed(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation("Localisation actuelle");
+          // TODO: Utiliser latitude/longitude pour la recherche
+          toast({
+            title: "Localisation obtenue",
+            description: "Recherche des pharmacies à proximité...",
+          });
+        },
+        (error) => {
+          toast({
+            title: "Erreur de géolocalisation",
+            description: "Impossible d'obtenir votre position.",
+            variant: "destructive",
+          });
+        }
+      );
+    } else {
+      toast({
+        title: "Géolocalisation non supportée",
+        description: "Votre navigateur ne supporte pas la géolocalisation.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -153,42 +161,86 @@ const PharmacySearch = () => {
           <div>
             <h2 className="text-xl font-semibold mb-4">Résultats de recherche</h2>
             
-            {searchResults.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-8">
+                <p>Recherche en cours...</p>
+              </div>
+            ) : pharmacies.length > 0 ? (
               <div className="space-y-4">
-                {searchResults.map((pharmacy) => (
-                  <div key={pharmacy.id} className="bg-white p-4 rounded-lg border shadow-sm">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-lg">{pharmacy.name}</h3>
-                        <p className="text-sm text-gray-500">{pharmacy.address}</p>
-                        <div className="mt-2 flex items-center">
-                          <div className={`w-2 h-2 rounded-full mr-2 ${pharmacy.medicationAvailable ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                          <p className="text-sm">
-                            {pharmacy.medicationAvailable 
-                              ? 'Médicament disponible' 
-                              : 'Médicament non disponible'}
-                          </p>
+                {pharmacies.map((pharmacy: any) => {
+                  const openingHours = pharmacy.opening_hours || {};
+                  const hoursText = pharmacy.is_24_7 
+                    ? 'Ouvert 24h/24' 
+                    : Object.values(openingHours)[0] || 'Horaires non disponibles';
+                  
+                  return (
+                    <div key={pharmacy.id} className="bg-white p-4 rounded-lg border shadow-sm">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-lg">{pharmacy.name}</h3>
+                          <p className="text-sm text-gray-500">{pharmacy.address}</p>
+                          <p className="text-sm text-gray-500">{pharmacy.city}, {pharmacy.country}</p>
+                          {pharmacy.phone && (
+                            <p className="text-sm text-gray-500 mt-1">
+                              <Phone className="h-3 w-3 inline mr-1" />
+                              {pharmacy.phone}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500 mt-1">{hoursText}</p>
+                          {pharmacy.is_24_7 && (
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded mt-1 inline-block">
+                              24/7
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-sm font-medium text-pharma-primary">{pharmacy.distance}</span>
-                        <p className="text-xs text-gray-500 mt-1">{pharmacy.openingHours}</p>
+                      
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {pharmacy.phone && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => window.location.href = `tel:${pharmacy.phone}`}
+                          >
+                            <Phone className="h-4 w-4 mr-1" />
+                            Appeler
+                          </Button>
+                        )}
+                        {pharmacy.latitude && pharmacy.longitude && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              window.open(
+                                `https://www.google.com/maps/dir/?api=1&destination=${pharmacy.latitude},${pharmacy.longitude}`,
+                                '_blank'
+                              );
+                            }}
+                          >
+                            <Navigation className="h-4 w-4 mr-1" />
+                            Itinéraire
+                          </Button>
+                        )}
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="bg-pharma-primary hover:bg-pharma-primary/90"
+                          onClick={() => {
+                            // TODO: Naviguer vers la page de détails de la pharmacie
+                            toast({
+                              title: "Détails",
+                              description: `Voir les détails de ${pharmacy.name}`,
+                            });
+                          }}
+                        >
+                          Voir les détails
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <Button variant="outline" size="sm">
-                        Appeler
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Itinéraire
-                      </Button>
-                      <Button variant="default" size="sm" className="bg-pharma-primary hover:bg-pharma-primary/90">
-                        Voir les détails
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8">

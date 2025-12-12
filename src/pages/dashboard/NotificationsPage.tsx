@@ -4,58 +4,30 @@ import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bell, BellOff, Clock, Calendar, Pill, MessageCircle, User, Settings, Check, Trash2 } from 'lucide-react';
+import { Bell, Clock, Calendar, Pill, MessageCircle, User, Check, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { notificationService } from '@/lib/api/services';
+import { useToast } from '@/components/ui/use-toast';
 
 export function NotificationsPage() {
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: "appointment",
-      title: "Rappel de rendez-vous",
-      message: "Votre consultation avec Dr. Marie Diallo est prévue demain à 14h30",
-      timestamp: "Il y a 2h",
-      read: false,
-      urgent: false
-    },
-    {
-      id: 2,
-      type: "medication",
-      title: "Prise de médicament",
-      message: "Il est temps de prendre votre Paracétamol (500mg)",
-      timestamp: "Il y a 1h",
-      read: false,
-      urgent: true
-    },
-    {
-      id: 3,
-      type: "message",
-      title: "Nouveau message",
-      message: "Dr. Ahmed Kone vous a envoyé un message",
-      timestamp: "Il y a 3h",
-      read: true,
-      urgent: false
-    },
-    {
-      id: 4,
-      type: "prescription",
-      title: "Ordonnance disponible",
-      message: "Votre ordonnance est prête en pharmacie",
-      timestamp: "Hier",
-      read: true,
-      urgent: false
-    },
-    {
-      id: 5,
-      type: "appointment",
-      title: "Confirmation de RDV",
-      message: "Votre rendez-vous du 20 juin avec Dr. Ahmed Kone est confirmé",
-      timestamp: "Il y a 2 jours",
-      read: true,
-      urgent: false
-    }
-  ]);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: notificationsData, isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => notificationService.getAll(),
+  });
+
+  const notifications = notificationsData?.data?.results || notificationsData?.data || [];
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['notifications', 'unread'],
+    queryFn: () => notificationService.getUnread(),
+  });
+
+  const unreadCount = unreadData?.data?.results?.length || unreadData?.data?.length || 0;
 
   const [settings, setSettings] = useState({
     appointments: true,
@@ -87,25 +59,49 @@ export function NotificationsPage() {
     }
   };
 
-  const handleMarkAsRead = (id: number) => {
-    setNotifications(prev => 
-      prev.map(notif => 
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  };
+  const markReadMutation = useMutation({
+    mutationFn: (id: number) => notificationService.markRead(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
 
-  const handleDeleteNotification = (id: number) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  const markAllReadMutation = useMutation({
+    mutationFn: () => notificationService.markAllRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      toast({
+        title: "Notifications marquées comme lues",
+        description: "Toutes les notifications ont été marquées comme lues.",
+      });
+    },
+  });
+
+  const handleMarkAsRead = (id: number) => {
+    markReadMutation.mutate(id);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, read: true }))
-    );
+    markAllReadMutation.mutate();
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    
+    if (days > 7) {
+      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    } else if (days > 0) {
+      return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+    } else if (hours > 0) {
+      return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+    } else {
+      return "À l'instant";
+    }
+  };
 
   return (
     <SidebarInset>
@@ -117,7 +113,11 @@ export function NotificationsPage() {
             <Badge variant="destructive">{unreadCount}</Badge>
           )}
         </div>
-        <Button variant="outline" onClick={handleMarkAllAsRead}>
+        <Button 
+          variant="outline" 
+          onClick={handleMarkAllAsRead}
+          disabled={markAllReadMutation.isPending || unreadCount === 0}
+        >
           <Check className="h-4 w-4 mr-2" />
           Tout marquer comme lu
         </Button>
@@ -131,7 +131,13 @@ export function NotificationsPage() {
           </TabsList>
 
           <TabsContent value="notifications" className="space-y-4">
-            {notifications.length === 0 ? (
+            {isLoading ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <p>Chargement des notifications...</p>
+                </CardContent>
+              </Card>
+            ) : notifications.length === 0 ? (
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Bell className="h-12 w-12 text-muted-foreground mb-4" />
@@ -142,52 +148,44 @@ export function NotificationsPage() {
                 </CardContent>
               </Card>
             ) : (
-              notifications.map((notification) => {
-                const NotificationIcon = getNotificationIcon(notification.type);
+              notifications.map((notification: any) => {
+                const NotificationIcon = getNotificationIcon(notification.notification_type);
                 return (
-                  <Card key={notification.id} className={`${!notification.read ? 'bg-blue-50/50 border-blue-200' : ''} ${notification.urgent ? 'border-red-200' : ''}`}>
+                  <Card 
+                    key={notification.id} 
+                    className={`${!notification.is_read ? 'bg-blue-50/50 border-blue-200' : ''}`}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
-                        <div className={`p-2 rounded-full ${getNotificationColor(notification.type)}`}>
+                        <div className={`p-2 rounded-full ${getNotificationColor(notification.notification_type)}`}>
                           <NotificationIcon className="h-4 w-4" />
                         </div>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium">{notification.title}</h4>
-                            {!notification.read && (
+                            {!notification.is_read && (
                               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                                 Nouveau
-                              </Badge>
-                            )}
-                            {notification.urgent && (
-                              <Badge variant="destructive">
-                                Urgent
                               </Badge>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground">{notification.message}</p>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Clock className="h-3 w-3" />
-                            {notification.timestamp}
+                            {formatTime(notification.created_at)}
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          {!notification.read && (
+                          {!notification.is_read && (
                             <Button 
                               variant="outline" 
                               size="sm"
                               onClick={() => handleMarkAsRead(notification.id)}
+                              disabled={markReadMutation.isPending}
                             >
                               <Check className="h-4 w-4" />
                             </Button>
                           )}
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteNotification(notification.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
                         </div>
                       </div>
                     </CardContent>

@@ -146,7 +146,7 @@ const ForPharmaciesPage = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <img 
-                    src="/pharmacie.webp" 
+                    src="/pharma.jpeg" 
                     alt="Pharmacie moderne avec Pharma Africa Connect" 
                     className="rounded-lg w-full"
                   />

@@ -1,192 +1,191 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Send, Paperclip, Search, Plus, User, Clock } from 'lucide-react';
+import { MessageCircle, Send, Search, User, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { messageService } from '@/lib/api/services';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Message {
   id: number;
-  sender: string;
+  sender: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    user_type: string;
+  };
+  recipient: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    user_type: string;
+  };
   content: string;
-  timestamp: string;
-  isDoctor: boolean;
-}
-
-interface Conversation {
-  id: number;
-  name: string;
-  specialty: string;
-  lastMessage: string;
-  timestamp: string;
-  unread: number;
-  online: boolean;
+  created_at: string;
+  is_read: boolean;
 }
 
 export function MessagesPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(1);
+  const [selectedRecipient, setSelectedRecipient] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Charger les conversations depuis localStorage ou utiliser les données par défaut
-  const loadConversations = (): Conversation[] => {
-    const saved = localStorage.getItem('pharmafriconnect_conversations');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return [
-      {
-        id: 1,
-        name: "Dr. Marie Diallo",
-        specialty: "Médecin généraliste",
-        lastMessage: "Merci pour les résultats. Tout semble normal.",
-        timestamp: "Il y a 2h",
-        unread: 0,
-        online: true
-      },
-      {
-        id: 2,
-        name: "Dr. Ahmed Kone",
-        specialty: "Cardiologue",
-        lastMessage: "Votre prochain RDV est confirmé pour le 20 juin.",
-        timestamp: "Hier",
-        unread: 1,
-        online: false
-      },
-      {
-        id: 3,
-        name: "Pharmacie du Centre",
-        specialty: "Pharmacie",
-        lastMessage: "Vos médicaments sont prêts pour retrait.",
-        timestamp: "Il y a 3 jours",
-        unread: 0,
-        online: true
-      },
-      {
-        id: 4,
-        name: "Dr. Sophie Martin",
-        specialty: "Dermatologue",
-        lastMessage: "N'hésitez pas si vous avez des questions.",
-        timestamp: "Il y a 1 semaine",
-        unread: 2,
-        online: false
-      }
-    ];
-  };
+  // Charger les messages reçus et envoyés
+  const { data: receivedData } = useQuery({
+    queryKey: ['messages', 'received'],
+    queryFn: () => messageService.getReceived(),
+  });
 
-  // Charger les messages depuis localStorage ou utiliser les données par défaut
-  const loadMessages = (conversationId: number): Message[] => {
-    const saved = localStorage.getItem(`pharmafriconnect_messages_${conversationId}`);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    if (conversationId === 1) {
-      return [
-        {
-          id: 1,
-          sender: "Dr. Marie Diallo",
-          content: "Bonjour Jean, j'ai bien reçu vos résultats d'analyses. Tout semble être dans les normes.",
-          timestamp: "14:30",
-          isDoctor: true
-        },
-        {
-          id: 2,
-          sender: "Vous",
-          content: "Merci docteur ! Est-ce que je dois continuer le traitement comme prévu ?",
-          timestamp: "14:45",
-          isDoctor: false
-        },
-        {
-          id: 3,
-          sender: "Dr. Marie Diallo",
-          content: "Oui, continuez exactement comme prescrit. Le paracétamol peut être arrêté dès que vous vous sentez mieux.",
-          timestamp: "14:50",
-          isDoctor: true
-        },
-        {
-          id: 4,
-          sender: "Dr. Marie Diallo",
-          content: "Pour l'amoxicilline, il est important de terminer tout le traitement même si vous vous sentez mieux.",
-          timestamp: "14:51",
-          isDoctor: true
-        },
-        {
-          id: 5,
-          sender: "Vous",
-          content: "D'accord, je note. Merci pour vos conseils !",
-          timestamp: "15:00",
-          isDoctor: false
-        },
-        {
-          id: 6,
-          sender: "Dr. Marie Diallo",
-          content: "Merci pour les résultats. Tout semble normal.",
-          timestamp: "16:30",
-          isDoctor: true
+  const { data: sentData } = useQuery({
+    queryKey: ['messages', 'sent'],
+    queryFn: () => messageService.getSent(),
+  });
+
+  const receivedMessages = receivedData?.data?.results || receivedData?.data || [];
+  const sentMessages = sentData?.data?.results || sentData?.data || [];
+
+  // Créer des conversations à partir des messages
+  const conversations = useMemo(() => {
+    const conversationMap = new Map<number, any>();
+    
+    // Traiter les messages reçus
+    receivedMessages.forEach((msg: Message) => {
+      const senderId = msg.sender.id;
+      if (!conversationMap.has(senderId)) {
+        conversationMap.set(senderId, {
+          id: senderId,
+          user: msg.sender,
+          lastMessage: msg.content,
+          timestamp: msg.created_at,
+          unread: msg.is_read ? 0 : 1,
+        });
+      } else {
+        const conv = conversationMap.get(senderId);
+        if (new Date(msg.created_at) > new Date(conv.timestamp)) {
+          conv.lastMessage = msg.content;
+          conv.timestamp = msg.created_at;
         }
-      ];
-    }
-    return [];
-  };
+        if (!msg.is_read) conv.unread++;
+      }
+    });
 
-  const [conversations, setConversations] = useState<Conversation[]>(loadConversations());
-  const [messages, setMessages] = useState<Message[]>(selectedConversation ? loadMessages(selectedConversation) : []);
+    // Traiter les messages envoyés
+    sentMessages.forEach((msg: Message) => {
+      const recipientId = msg.recipient.id;
+      if (!conversationMap.has(recipientId)) {
+        conversationMap.set(recipientId, {
+          id: recipientId,
+          user: msg.recipient,
+          lastMessage: msg.content,
+          timestamp: msg.created_at,
+          unread: 0,
+        });
+      } else {
+        const conv = conversationMap.get(recipientId);
+        if (new Date(msg.created_at) > new Date(conv.timestamp)) {
+          conv.lastMessage = msg.content;
+          conv.timestamp = msg.created_at;
+        }
+      }
+    });
 
-  // Mettre à jour les messages quand la conversation change
-  useEffect(() => {
-    if (selectedConversation) {
-      setMessages(loadMessages(selectedConversation));
-    }
-  }, [selectedConversation]);
+    return Array.from(conversationMap.values()).sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }, [receivedMessages, sentMessages]);
 
-  const selectedConversationData = conversations.find(c => c.id === selectedConversation);
+  // Obtenir les messages de la conversation sélectionnée
+  const conversationMessages = useMemo(() => {
+    if (!selectedRecipient) return [];
+    
+    const allMessages = [
+      ...receivedMessages.filter((msg: Message) => msg.sender.id === selectedRecipient),
+      ...sentMessages.filter((msg: Message) => msg.recipient.id === selectedRecipient),
+    ];
+    
+    return allMessages.sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+  }, [selectedRecipient, receivedMessages, sentMessages]);
+
+  const sendMutation = useMutation({
+    mutationFn: (data: any) => messageService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+      setNewMessage('');
+      toast({
+        title: "Message envoyé",
+        description: "Votre message a été envoyé avec succès.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.response?.data?.detail || "Impossible d'envoyer le message.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSendMessage = () => {
-    if (newMessage.trim() && selectedConversation) {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-      
-      const newMsg: Message = {
-        id: Date.now(),
-        sender: "Vous",
-        content: newMessage.trim(),
-        timestamp: timeString,
-        isDoctor: false
-      };
+    if (!newMessage.trim() || !selectedRecipient) return;
+    
+    sendMutation.mutate({
+      recipient: selectedRecipient,
+      content: newMessage.trim(),
+    });
+  };
 
-      const updatedMessages = [...messages, newMsg];
-      setMessages(updatedMessages);
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem(`pharmafriconnect_messages_${selectedConversation}`, JSON.stringify(updatedMessages));
-      
-      // Mettre à jour la dernière conversation
-      const updatedConversations = conversations.map(conv => {
-        if (conv.id === selectedConversation) {
-          return {
-            ...conv,
-            lastMessage: newMessage.trim(),
-            timestamp: "À l'instant"
-          };
-        }
-        return conv;
-      });
-      setConversations(updatedConversations);
-      localStorage.setItem('pharmafriconnect_conversations', JSON.stringify(updatedConversations));
-      
-      setNewMessage('');
+  const formatUserName = (user: any) => {
+    if (!user) return 'Utilisateur';
+    if (user.user_type === 'doctor') {
+      return `Dr. ${user.first_name} ${user.last_name}`;
     }
+    return `${user.first_name} ${user.last_name}`;
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    
+    if (days > 7) {
+      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    } else if (days > 0) {
+      return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
+    } else if (hours > 0) {
+      return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
+    } else {
+      return "À l'instant";
+    }
+  };
+
+  const formatMessageTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   };
 
   // Filtrer les conversations selon la recherche
-  const filteredConversations = conversations.filter(conv =>
-    conv.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conv.specialty.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredConversations = conversations.filter(conv => {
+    const userName = formatUserName(conv.user);
+    const search = searchTerm.toLowerCase();
+    return (
+      userName.toLowerCase().includes(search) ||
+      conv.user.user_type.toLowerCase().includes(search)
+    );
+  });
+
+  const selectedConversationData = conversations.find(c => c.id === selectedRecipient);
 
   return (
     <SidebarInset>
@@ -195,10 +194,6 @@ export function MessagesPage() {
         <div className="flex flex-1 items-center gap-2">
           <h1 className="text-lg font-semibold">Messages</h1>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau message
-        </Button>
       </header>
 
       <div className="flex-1 flex">
@@ -217,103 +212,108 @@ export function MessagesPage() {
           </div>
           
           <div className="overflow-y-auto">
-            {filteredConversations.map((conversation) => (
-              <div
-                key={conversation.id}
-                className={`p-4 border-b cursor-pointer hover:bg-muted/40 transition-colors ${
-                  selectedConversation === conversation.id ? 'bg-muted/60' : ''
-                }`}
-                onClick={() => setSelectedConversation(conversation.id)}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="relative">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback>
-                        {conversation.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    {conversation.online && (
-                      <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium truncate">{conversation.name}</h4>
-                      <div className="flex items-center gap-2">
-                        {conversation.unread > 0 && (
-                          <Badge variant="destructive" className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                            {conversation.unread}
-                          </Badge>
-                        )}
-                        <span className="text-xs text-muted-foreground">{conversation.timestamp}</span>
-                      </div>
+            {filteredConversations.length === 0 ? (
+              <div className="p-4 text-center text-muted-foreground">
+                <p>Aucune conversation</p>
+              </div>
+            ) : (
+              filteredConversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className={`p-4 border-b cursor-pointer hover:bg-muted/40 transition-colors ${
+                    selectedRecipient === conversation.id ? 'bg-muted/60' : ''
+                  }`}
+                  onClick={() => setSelectedRecipient(conversation.id)}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="relative">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback>
+                          {conversation.user.first_name[0]}{conversation.user.last_name[0]}
+                        </AvatarFallback>
+                      </Avatar>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{conversation.specialty}</p>
-                    <p className="text-sm truncate mt-1">{conversation.lastMessage}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium truncate">{formatUserName(conversation.user)}</h4>
+                        <div className="flex items-center gap-2">
+                          {conversation.unread > 0 && (
+                            <Badge variant="destructive" className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                              {conversation.unread}
+                            </Badge>
+                          )}
+                          <span className="text-xs text-muted-foreground">{formatTime(conversation.timestamp)}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate capitalize">{conversation.user.user_type}</p>
+                      <p className="text-sm truncate mt-1">{conversation.lastMessage}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
         {/* Messages Area */}
         <div className="flex-1 flex flex-col">
-          {selectedConversation ? (
+          {selectedRecipient && selectedConversationData ? (
             <>
               {/* Conversation Header */}
               <div className="p-4 border-b bg-background">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback>
-                      {selectedConversationData?.name.split(' ').map(n => n[0]).join('')}
+                      {selectedConversationData.user.first_name[0]}{selectedConversationData.user.last_name[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-medium">{selectedConversationData?.name}</h3>
-                    <p className="text-sm text-muted-foreground">{selectedConversationData?.specialty}</p>
-                  </div>
-                  <div className="ml-auto flex items-center gap-2">
-                    {selectedConversationData?.online && (
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
-                        En ligne
-                      </Badge>
-                    )}
+                    <h3 className="font-medium">{formatUserName(selectedConversationData.user)}</h3>
+                    <p className="text-sm text-muted-foreground capitalize">{selectedConversationData.user.user_type}</p>
                   </div>
                 </div>
               </div>
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isDoctor ? 'justify-start' : 'justify-end'}`}
-                  >
-                    <div className={`max-w-xs lg:max-w-md ${message.isDoctor ? 'order-2' : 'order-1'}`}>
-                      <div className={`p-3 rounded-lg ${
-                        message.isDoctor 
-                          ? 'bg-muted text-foreground' 
-                          : 'bg-primary text-primary-foreground'
-                      }`}>
-                        <p className="text-sm">{message.content}</p>
-                      </div>
-                      <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
-                        message.isDoctor ? 'justify-start' : 'justify-end'
-                      }`}>
-                        <Clock className="h-3 w-3" />
-                        {message.timestamp}
-                      </div>
-                    </div>
-                    {message.isDoctor && (
-                      <Avatar className="h-8 w-8 order-1 mr-2">
-                        <AvatarFallback className="text-xs">
-                          {message.sender.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
+                {conversationMessages.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    <p>Aucun message dans cette conversation</p>
                   </div>
-                ))}
+                ) : (
+                  conversationMessages.map((message: Message) => {
+                    const isFromCurrentUser = sentMessages.some((m: Message) => m.id === message.id);
+                    return (
+                      <div
+                        key={message.id}
+                        className={`flex ${isFromCurrentUser ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-xs lg:max-w-md ${isFromCurrentUser ? 'order-1' : 'order-2'}`}>
+                          <div className={`p-3 rounded-lg ${
+                            isFromCurrentUser
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted text-foreground'
+                          }`}>
+                            <p className="text-sm">{message.content}</p>
+                          </div>
+                          <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
+                            isFromCurrentUser ? 'justify-end' : 'justify-start'
+                          }`}>
+                            <Clock className="h-3 w-3" />
+                            {formatMessageTime(message.created_at)}
+                          </div>
+                        </div>
+                        {!isFromCurrentUser && (
+                          <Avatar className="h-8 w-8 order-1 mr-2">
+                            <AvatarFallback className="text-xs">
+                              {message.sender.first_name[0]}{message.sender.last_name[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
 
               {/* Message Input */}
@@ -326,6 +326,7 @@ export function MessagesPage() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       className="resize-none"
                       rows={2}
+                      disabled={sendMutation.isPending}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
@@ -335,10 +336,11 @@ export function MessagesPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Button variant="outline" size="icon">
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" onClick={handleSendMessage}>
+                    <Button 
+                      size="icon" 
+                      onClick={handleSendMessage}
+                      disabled={sendMutation.isPending || !newMessage.trim()}
+                    >
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>

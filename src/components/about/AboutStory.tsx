@@ -27,7 +27,7 @@ const AboutStory = () => {
           <div className="relative">
             <div className="aspect-w-5 aspect-h-4 rounded-lg overflow-hidden shadow-xl">
               <img 
-                src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="/WhatsApp Image 2025-12-07 at 22.43.19.jpeg" 
                 alt="Équipe Pharma Africa Connect" 
                 className="object-cover w-full h-full"
               />

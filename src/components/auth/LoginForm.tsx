@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
+import { authService } from '@/lib/api/auth';
+import { STORAGE_KEYS } from '@/lib/api/config';
 
 const LoginForm = () => {
-  const [email, setEmail] = React.useState('');
+  const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [firstName, setFirstName] = React.useState('');
   const [rememberMe, setRememberMe] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
@@ -20,62 +21,25 @@ const LoginForm = () => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simuler l'authentification
-    setTimeout(() => {
-      // Déterminer le type d'utilisateur (insensible à la casse)
-      const emailLower = email.toLowerCase().trim();
-      let userType = 'patient';
-      let dashboardPath = '/dashboard';
+    try {
+      const response = await authService.login({ username, password });
+      const userType = response.user.user_type;
       
-      // Vérifier dans l'ordre de priorité (admin > doctor > pharmacy > patient)
-      if (emailLower.includes('admin')) {
-        userType = 'admin';
+      // Déterminer le chemin du dashboard selon le type d'utilisateur
+      let dashboardPath = '/dashboard';
+      if (userType === 'admin') {
         dashboardPath = '/admin-dashboard';
-      } else if (emailLower.includes('doctor') || emailLower.includes('dr') || emailLower.includes('medecin') || emailLower.includes('médecin')) {
-        userType = 'doctor';
+      } else if (userType === 'doctor') {
         dashboardPath = '/doctor-dashboard';
-      } else if (emailLower.includes('pharmacy') || emailLower.includes('pharmacie') || emailLower.includes('pharmacien')) {
-        userType = 'pharmacy';
+      } else if (userType === 'pharmacist') {
         dashboardPath = '/pharmacy-dashboard';
       }
       
-      // Debug: afficher dans la console pour vérifier
-      console.log('=== CONNEXION ===');
-      console.log('Email saisi:', email);
-      console.log('Email en minuscules:', emailLower);
-      console.log('UserType détecté:', userType);
-      console.log('Dashboard path:', dashboardPath);
-      console.log('================');
-      
-      // Extraire le prénom depuis l'email si pas fourni, ou utiliser le prénom saisi
-      let userName = firstName.trim();
-      if (!userName && email) {
-        // Essayer d'extraire un nom depuis l'email (avant le @)
-        const emailName = email.split('@')[0];
-        // Capitaliser la première lettre
-        userName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-      }
-      if (!userName) {
-        userName = 'Utilisateur'; // Nom par défaut
-      }
-      
-      // Créer la session utilisateur
-      const session = {
-        email,
-        firstName: userName,
-        userType,
-        loginTime: new Date().toISOString(),
-        rememberMe
-      };
-      
-      // Sauvegarder la session AVANT la navigation
-      localStorage.setItem('pharmafriconnect_user_session', JSON.stringify(session));
-      
-      // Si "Se souvenir de moi", sauvegarder aussi l'email
+      // Si "Se souvenir de moi", sauvegarder aussi l'username
       if (rememberMe) {
-        localStorage.setItem('pharmafriconnect_remembered_email', email);
+        localStorage.setItem(STORAGE_KEYS.REMEMBERED_EMAIL, username);
       } else {
-        localStorage.removeItem('pharmafriconnect_remembered_email');
+        localStorage.removeItem(STORAGE_KEYS.REMEMBERED_EMAIL);
       }
       
       toast({
@@ -83,19 +47,45 @@ const LoginForm = () => {
         description: `Vous êtes maintenant connecté en tant que ${userType}.`,
       });
       
-      setIsLoading(false);
-      
-      // Utiliser window.location.href directement pour garantir la navigation
-      console.log('Redirection vers:', dashboardPath);
+      // Rediriger vers le dashboard approprié
       window.location.href = dashboardPath;
-    }, 1500);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      let errorMessage = 'Erreur de connexion. Vérifiez vos identifiants.';
+      
+      if (error.response) {
+        // Erreur de l'API
+        if (error.response.data) {
+          if (error.response.data.detail) {
+            errorMessage = error.response.data.detail;
+          } else if (error.response.data.non_field_errors) {
+            errorMessage = error.response.data.non_field_errors[0];
+          } else if (error.response.data.message) {
+            errorMessage = error.response.data.message;
+          } else if (typeof error.response.data === 'string') {
+            errorMessage = error.response.data;
+          }
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (error.request) {
+        errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+      }
+      
+      toast({
+        title: "Erreur de connexion",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   };
   
-  // Charger l'email sauvegardé si "Se souvenir de moi" était coché
+  // Charger l'username sauvegardé si "Se souvenir de moi" était coché
   React.useEffect(() => {
-    const rememberedEmail = localStorage.getItem('pharmafriconnect_remembered_email');
-    if (rememberedEmail) {
-      setEmail(rememberedEmail);
+    const rememberedUsername = localStorage.getItem(STORAGE_KEYS.REMEMBERED_EMAIL);
+    if (rememberedUsername) {
+      setUsername(rememberedUsername);
       setRememberMe(true);
     }
   }, []);
@@ -111,31 +101,17 @@ const LoginForm = () => {
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="username">Nom d'utilisateur</Label>
           <Input
-            id="email"
-            type="email"
-            placeholder="exemple@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="username"
+            type="text"
+            placeholder="Votre nom d'utilisateur"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
           <p className="text-xs text-muted-foreground">
-            Demo: utilisez "admin@", "doctor@", "pharmacy@" ou "patient@" pour tester les différents tableaux de bord
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="firstName">Prénom (optionnel)</Label>
-          <Input
-            id="firstName"
-            type="text"
-            placeholder="Votre prénom"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground">
-            Si non renseigné, un nom sera généré depuis votre email
+            Utilisez votre nom d'utilisateur pour vous connecter
           </p>
         </div>
         

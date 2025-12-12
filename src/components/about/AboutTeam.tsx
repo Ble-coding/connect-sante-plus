@@ -3,28 +3,28 @@ import React from 'react';
 
 const teamMembers = [
   {
-    name: 'Dr. Sophia Martin',
-    role: 'Fondatrice & CEO',
-    bio: 'Médecin de formation avec 15 ans d\'expérience dans la santé digitale.',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
+    name: 'Dr KOUAME Désiré ',
+    role: 'Enseignement-Chercheur à l\'Universite Félix HB',
+    bio: 'Dir. Cord. Adjoint Prog.Nat.Nutrition MSHPCMU',
+    image: '/WhatsApp Image 2025-12-08 at 07.57.18.jpeg'
   },
   {
     name: 'Thomas Diallo',
     role: 'CTO',
     bio: 'Expert en technologies web et mobile avec un focus sur la sécurité des données de santé.',
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
+    image: '/WhatsApp Image 2025-12-08 at 07.57.18 (1).jpeg'
   },
   {
-    name: 'Aminata Koné',
-    role: 'Directrice des Opérations',
-    bio: 'Spécialiste en logistique pharmaceutique avec une expertise dans l\'optimisation de la chaîne d\'approvisionnement.',
-    image: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
+    name: 'Dr Ékra Nadia',
+    role: 'Pharmacienne à la centrale d\'achat en Côte d\'Ivoire.',
+    
+    image: '/WhatsApp Image 2025-12-08 at 07.57.18 (2).jpeg'
   },
   {
-    name: 'Dr. Robert Chen',
-    role: 'Conseiller Médical',
-    bio: 'Professeur en santé publique avec un intérêt particulier pour la télémédecine.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
+    name: 'Prisca N’Gotta Fondatrice',
+    role: 'Ingénieur comptable de formation',
+   
+    image: '/WhatsApp Image 2025-12-07 at 22.43.19.jpeg'
   }
 ];
 

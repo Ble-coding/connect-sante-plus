@@ -147,7 +147,7 @@ const ForPatientsPage = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <img 
-                    src="/OIP15.webp" 
+                    src="/utilisateur.jpeg" 
                     alt="Patient utilisant Pharma Africa Connect" 
                     className="rounded-lg w-full"
                   />

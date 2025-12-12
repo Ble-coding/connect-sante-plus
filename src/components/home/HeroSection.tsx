@@ -131,7 +131,7 @@ const HeroSection = () => {
               transition={{ duration: 0.3 }}
             >
               <img 
-                src="/image.png" 
+                src="/mede.jpeg" 
                 alt="Pharma Africa Connect - Plateforme de santé connectée" 
                 className="rounded-lg w-full h-auto"
               />

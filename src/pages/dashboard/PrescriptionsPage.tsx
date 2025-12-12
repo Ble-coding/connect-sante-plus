@@ -1,63 +1,81 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Eye, Calendar, User, Pill, Search, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useQuery } from '@tanstack/react-query';
+import { prescriptionService } from '@/lib/api/services';
 
 export function PrescriptionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const activePrescriptions = [
-    {
-      id: 1,
-      doctor: "Dr. Marie Diallo",
-      date: "10 Juin 2024",
-      medications: [
-        { name: "Paracétamol", dosage: "500mg", frequency: "3x/jour", duration: "7 jours" },
-        { name: "Amoxicilline", dosage: "250mg", frequency: "2x/jour", duration: "10 jours" },
-        { name: "Vitamine D", dosage: "1000 UI", frequency: "1x/jour", duration: "30 jours" }
-      ],
-      status: "active",
-      validUntil: "10 Juillet 2024"
-    },
-    {
-      id: 2,
-      doctor: "Dr. Ahmed Kone",
-      date: "5 Juin 2024",
-      medications: [
-        { name: "Aspirine", dosage: "100mg", frequency: "1x/jour", duration: "continue" },
-        { name: "Atorvastatine", dosage: "20mg", frequency: "1x/soir", duration: "continue" }
-      ],
-      status: "active",
-      validUntil: "5 Juillet 2024"
-    }
-  ];
+  const { data: activeData, isLoading: isLoadingActive } = useQuery({
+    queryKey: ['prescriptions', 'active'],
+    queryFn: () => prescriptionService.getActive(),
+  });
 
-  const completedPrescriptions = [
-    {
-      id: 3,
-      doctor: "Dr. Sophie Martin",
-      date: "25 Mai 2024",
-      medications: [
-        { name: "Cortisone", dosage: "10mg", frequency: "1x/jour", duration: "5 jours" },
-        { name: "Antihistaminique", dosage: "10mg", frequency: "1x/soir", duration: "7 jours" }
-      ],
-      status: "terminée",
-      validUntil: "25 Juin 2024"
-    }
-  ];
+  const { data: completedData, isLoading: isLoadingCompleted } = useQuery({
+    queryKey: ['prescriptions', 'completed'],
+    queryFn: () => prescriptionService.getCompleted(),
+  });
+
+  const activePrescriptions = activeData?.data?.results || activeData?.data || [];
+  const completedPrescriptions = completedData?.data?.results || completedData?.data || [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
-      case 'terminée': return 'bg-gray-100 text-gray-800';
+      case 'completed': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active': return 'Active';
+      case 'completed': return 'Terminée';
+      default: return status;
+    }
+  };
+
+  const formatDoctorName = (doctor: any) => {
+    if (!doctor) return 'Médecin';
+    return `Dr. ${doctor.first_name} ${doctor.last_name}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  // Filtrer les ordonnances selon la recherche
+  const filteredActive = useMemo(() => {
+    return activePrescriptions.filter((prescription: any) => {
+      const doctorName = formatDoctorName(prescription.doctor);
+      const medicationNames = prescription.medications?.map((m: any) => m.medication?.name || '').join(' ') || '';
+      const search = searchTerm.toLowerCase();
+      return (
+        doctorName.toLowerCase().includes(search) ||
+        medicationNames.toLowerCase().includes(search)
+      );
+    });
+  }, [activePrescriptions, searchTerm]);
+
+  const filteredCompleted = useMemo(() => {
+    return completedPrescriptions.filter((prescription: any) => {
+      const doctorName = formatDoctorName(prescription.doctor);
+      const medicationNames = prescription.medications?.map((m: any) => m.medication?.name || '').join(' ') || '';
+      const search = searchTerm.toLowerCase();
+      return (
+        doctorName.toLowerCase().includes(search) ||
+        medicationNames.toLowerCase().includes(search)
+      );
+    });
+  }, [completedPrescriptions, searchTerm]);
 
   return (
     <SidebarInset>
@@ -88,122 +106,154 @@ export function PrescriptionsPage() {
 
         <Tabs defaultValue="active" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="active">Actives ({activePrescriptions.length})</TabsTrigger>
-            <TabsTrigger value="completed">Terminées ({completedPrescriptions.length})</TabsTrigger>
+            <TabsTrigger value="active">
+              Actives ({filteredActive.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              Terminées ({filteredCompleted.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-4">
-            {activePrescriptions.map((prescription) => (
-              <Card key={prescription.id}>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Ordonnance du {prescription.date}
-                        <Badge className={getStatusColor(prescription.status)}>
-                          {prescription.status}
-                        </Badge>
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-1 mt-1">
-                        <User className="h-4 w-4" />
-                        {prescription.doctor}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Voir
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Télécharger
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="text-sm text-muted-foreground">
-                      Valable jusqu'au: {prescription.validUntil}
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="font-medium flex items-center gap-2">
-                        <Pill className="h-4 w-4" />
-                        Médicaments ({prescription.medications.length})
-                      </h4>
-                      {prescription.medications.map((med, index) => (
-                        <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-muted/50 rounded-lg gap-2">
-                          <div>
-                            <div className="font-medium">{med.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {med.dosage} • {med.frequency} • {med.duration}
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            Trouver en pharmacie
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+            {isLoadingActive ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p>Chargement des ordonnances...</p>
                 </CardContent>
               </Card>
-            ))}
+            ) : filteredActive.length === 0 ? (
+              <Card>
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  Aucune ordonnance active
+                </CardContent>
+              </Card>
+            ) : (
+              filteredActive.map((prescription: any) => (
+                <Card key={prescription.id}>
+                  <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          Ordonnance du {formatDate(prescription.issue_date)}
+                          <Badge className={getStatusColor(prescription.status)}>
+                            {getStatusLabel(prescription.status)}
+                          </Badge>
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-1 mt-1">
+                          <User className="h-4 w-4" />
+                          {formatDoctorName(prescription.doctor)}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Voir
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="text-sm text-muted-foreground">
+                        Valable jusqu'au: {formatDate(prescription.valid_until)}
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Pill className="h-4 w-4" />
+                          Médicaments ({prescription.medications?.length || 0})
+                        </h4>
+                        {prescription.medications?.map((med: any, index: number) => (
+                          <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-muted/50 rounded-lg gap-2">
+                            <div>
+                              <div className="font-medium">{med.medication?.name || med.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {med.dosage} • {med.frequency} • {med.duration}
+                              </div>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              Trouver en pharmacie
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="completed" className="space-y-4">
-            {completedPrescriptions.map((prescription) => (
-              <Card key={prescription.id}>
-                <CardHeader>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <FileText className="h-5 w-5" />
-                        Ordonnance du {prescription.date}
-                        <Badge className={getStatusColor(prescription.status)}>
-                          {prescription.status}
-                        </Badge>
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-1 mt-1">
-                        <User className="h-4 w-4" />
-                        {prescription.doctor}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Voir
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        Télécharger
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <h4 className="font-medium flex items-center gap-2">
-                        <Pill className="h-4 w-4" />
-                        Médicaments ({prescription.medications.length})
-                      </h4>
-                      {prescription.medications.map((med, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                          <div>
-                            <div className="font-medium">{med.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {med.dosage} • {med.frequency} • {med.duration}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+            {isLoadingCompleted ? (
+              <Card>
+                <CardContent className="p-6 text-center">
+                  <p>Chargement des ordonnances...</p>
                 </CardContent>
               </Card>
-            ))}
+            ) : filteredCompleted.length === 0 ? (
+              <Card>
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  Aucune ordonnance terminée
+                </CardContent>
+              </Card>
+            ) : (
+              filteredCompleted.map((prescription: any) => (
+                <Card key={prescription.id}>
+                  <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <FileText className="h-5 w-5" />
+                          Ordonnance du {formatDate(prescription.issue_date)}
+                          <Badge className={getStatusColor(prescription.status)}>
+                            {getStatusLabel(prescription.status)}
+                          </Badge>
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-1 mt-1">
+                          <User className="h-4 w-4" />
+                          {formatDoctorName(prescription.doctor)}
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Voir
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Pill className="h-4 w-4" />
+                          Médicaments ({prescription.medications?.length || 0})
+                        </h4>
+                        {prescription.medications?.map((med: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                            <div>
+                              <div className="font-medium">{med.medication?.name || med.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {med.dosage} • {med.frequency} • {med.duration}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </div>

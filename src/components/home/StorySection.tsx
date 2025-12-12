@@ -28,7 +28,7 @@ const StorySection = () => {
               transition={{ duration: 0.3 }}
             >
               <img 
-                src="/OIP15.webp" 
+                src="/utilisateur.jpeg" 
                 alt="Notre histoire" 
                 className="rounded-xl shadow-xl object-cover h-[500px] w-full"
               />

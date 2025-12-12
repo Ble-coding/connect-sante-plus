@@ -29,6 +29,7 @@ import CareersPage from "./pages/CareersPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
+import Chatbot from '@/components/chatbot/Chatbot';
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      <Chatbot />
     </TooltipProvider>
   </QueryClientProvider>
 );

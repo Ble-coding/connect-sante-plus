@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
@@ -16,6 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { useMutation } from '@tanstack/react-query';
+import { contactService } from '@/lib/api/services';
+import { useToast } from '@/components/ui/use-toast';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -27,17 +31,43 @@ const ContactPage = () => {
     subject: '',
     message: ''
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const { toast } = useToast();
+
+  const mutation = useMutation({
+    mutationFn: (data: any) => contactService.sendMessage(data),
+    onSuccess: () => {
+      toast({
+        title: "Message envoyé",
+        description: "Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.",
+      });
+      setFormData({ name: '', email: '', phone: '', company: '', type: '', subject: '', message: '' });
+      recaptchaRef.current?.reset();
+      setCaptchaValue(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erreur",
+        description: error.response?.data?.detail || "Impossible d'envoyer le message. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Ici vous pouvez ajouter la logique d'envoi du formulaire
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: '', email: '', phone: '', company: '', type: '', subject: '', message: '' });
-    }, 3000);
+    
+    if (!captchaValue) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez compléter le captcha.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    mutation.mutate({ ...formData, captcha_token: captchaValue });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -154,7 +184,7 @@ const ContactPage = () => {
                     Formulaire de contact
                   </h2>
                   
-                  {isSubmitted ? (
+                  {mutation.isSuccess ? (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -269,12 +299,21 @@ const ContactPage = () => {
                         />
                       </div>
 
+                      <div className="flex justify-center">
+                        <ReCAPTCHA
+                          ref={recaptchaRef}
+                          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+                          onChange={(value) => setCaptchaValue(value)}
+                        />
+                      </div>
+
                       <Button
                         type="submit"
                         size="lg"
                         className="w-full bg-pharma-primary hover:bg-pharma-primary/90 text-white"
+                        disabled={mutation.isPending || !captchaValue}
                       >
-                        Envoyer le message
+                        {mutation.isPending ? 'Envoi en cours...' : 'Envoyer le message'}
                         <Send className="ml-2 h-4 w-4" />
                       </Button>
                     </form>
